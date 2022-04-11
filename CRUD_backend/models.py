@@ -16,6 +16,7 @@ class student(models.Model):
 
 
 class staff (models.Model):
+    
     staff_id= models.CharField(max_length=100,primary_key=True)
     staff_first_name= models.CharField(max_length=100)
     staff_middle_name= models.CharField(max_length=100)
@@ -35,8 +36,8 @@ class appointment(models.Model):
     appointment_time= models.DateTimeField()
     appointment_status= models.CharField(max_length=10)
     appointment_description= models.CharField(max_length=100)
-    appointment_type=models.CharField(max_length=100)
-    appointment_category= models.CharField(max_length=100)
+    appointment_type=models.CharField(max_length=10,choices=(('Indiv', 'Individual'), ('Grp', 'Group')), default='Indiv')
+    appointment_category= models.CharField (max_length=10, choices=(('Priv', 'Private'), ('Acad', 'Academic'), ('Other', 'Others')), default='Acad')
     staff_phone_number= models.IntegerField()
     student_phone_number= models.IntegerField()
     student_reg_number= models.ForeignKey(student, on_delete=models.CASCADE)
