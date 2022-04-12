@@ -4,10 +4,10 @@ from django.db import models
 class student(models.Model):
     student_reg_number = models.CharField(max_length=100, primary_key= True)
     student_first_name = models.CharField(max_length=100)
-    student_middle_name = models.CharField(max_length=100)
+    student_middle_name = models.CharField(max_length=100,null= True)
     student_surname = models.CharField(max_length=100)
     student_degree_program = models.CharField(max_length=100)
-    student_fingerprint_id = 
+    student_fingerprint_id = models.CharField(max_length=100)
     student_gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default='F')
 
     def __str__(self):
@@ -17,10 +17,10 @@ class student(models.Model):
 
 
 class staff (models.Model):
-    
+
     staff_id= models.CharField(max_length=100,primary_key=True)
     staff_first_name= models.CharField(max_length=100)
-    staff_middle_name= models.CharField(max_length=100)
+    staff_middle_name= models.CharField(max_length=100, null =True)
     staff_surname= models.CharField(max_length=100)
     staff_office= models.CharField(max_length=100)
     staff_role= models.CharField(max_length=50)
@@ -33,10 +33,8 @@ class staff (models.Model):
 
 
 class appointment(models.Model):
+
     appointment_id= models.BigAutoField(primary_key=True)
-    appointment_time= models.DateTimeField()
-    appointment_status= models.CharField(max_length=10)
-    appointment_description= models.CharField(max_length=100)
     appointment_type=models.CharField(max_length=10,choices=(('Indiv', 'Individual'), ('Grp', 'Group')), default='Indiv')
     appointment_category= models.CharField (max_length=10, choices=(('Priv', 'Private'), ('Acad', 'Academic'), ('Other', 'Others')), default='Acad')
     staff_phone_number= models.IntegerField()
@@ -53,7 +51,7 @@ class appointment(models.Model):
 class task (models.Model):
     task_id= models.BigAutoField(primary_key=True)
     task_issue_date= models.DateTimeField()
-    task_feedback_file= models.FileField(null=True)
+    task_feedback_file= models.CharField(max_length= 100, null=True)
     task_type= models.CharField(max_length=100)
     task_description= models.CharField(max_length=100)
     staff_id= models.ForeignKey(staff, on_delete=models.CASCADE)
