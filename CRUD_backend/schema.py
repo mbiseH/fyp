@@ -96,7 +96,7 @@ class Query(graphene.ObjectType):
 class create_student(graphene.Mutation):
 
     class  Arguments:
-        student_reg_number = graphene.String()
+        student_reg_number = graphene.ID()
         student_first_name = graphene.String()
         student_middle_name = graphene.String()
         student_surname = graphene.String()
@@ -122,7 +122,7 @@ class create_student(graphene.Mutation):
 class update_student(graphene.Mutation):
 
     class  Arguments:
-        student_reg_number = graphene.String()
+        student_reg_number = graphene.ID()
         student_first_name = graphene.String()
         student_middle_name = graphene.String()
         student_surname = graphene.String()
@@ -167,7 +167,7 @@ class delete_student(graphene.Mutation):
 class create_staff(graphene.Mutation):
 
     class  Arguments:
-        staff_id= graphene.String()
+        staff_id= graphene.ID()
         staff_first_name= graphene.String()
         staff_middle_name= graphene.String()
         staff_surname= graphene.String()
