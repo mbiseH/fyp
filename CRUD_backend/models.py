@@ -7,6 +7,7 @@ class student(models.Model):
     student_middle_name = models.CharField(max_length=100)
     student_surname = models.CharField(max_length=100)
     student_degree_program = models.CharField(max_length=100)
+    student_fingerprint_id = 
     student_gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default='F')
 
     def __str__(self):
@@ -52,7 +53,7 @@ class appointment(models.Model):
 class task (models.Model):
     task_id= models.BigAutoField(primary_key=True)
     task_issue_date= models.DateTimeField()
-    task_feedback_file= models.FileField()
+    task_feedback_file= models.FileField(null=True)
     task_type= models.CharField(max_length=100)
     task_description= models.CharField(max_length=100)
     staff_id= models.ForeignKey(staff, on_delete=models.CASCADE)
@@ -65,7 +66,7 @@ class task (models.Model):
 
 
 
-class users(models.Model):
+class user(models.Model):
     user_id= models.BigAutoField(primary_key=True)
     user_phone_number=models.IntegerField()
     user_password= models.CharField(max_length=100)
