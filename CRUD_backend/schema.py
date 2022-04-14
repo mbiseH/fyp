@@ -1,3 +1,4 @@
+from django.forms import Field
 import graphene
 from graphene_django import DjangoObjectType
 from CRUD_backend.models import student, appointment, task, staff, user
@@ -7,6 +8,7 @@ from CRUD_backend.models import student, appointment, task, staff, user
 class student_type(DjangoObjectType):
     class Meta:
         model = student
+
 
 class appointment_type(DjangoObjectType):
     class Meta:
@@ -25,62 +27,61 @@ class  user_type(DjangoObjectType):
         model = user
 
 
-
 class Query(graphene.ObjectType):
 
     all_students = graphene.List(student_type)
-    student = graphene.Field(student_type, id=graphene.ID())
+    student = graphene.Field(student_type, student_reg_number = graphene.ID())
 
     def resolve_all_students(self, info, **kwargs):
         # Querying a list of all students
         return student.objects.all()
-    def resolve_student(self, info, id):
+    def resolve_student(self, info, student_reg_number):
         # Querying a single student here wazeee
-        return student.objects.get(pk=id)
+        return student.objects.get(pk=student_reg_number)
 
 
     all_appointments = graphene.List(appointment_type)
-    appointment = graphene.Field(appointment_type, id=graphene.ID())
+    appointment = graphene.Field(appointment_type, appointment_id=graphene.ID())
 
     def resolve_all_apppointments(self, info, **kwargs):
         # Querying a list of all appointments
         return appointment.objects.all()
-    def resolve_appointment(self, info, id):
+    def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
-        return appointment.objects.get(pk=id)
+        return appointment.objects.get(pk=appointment_id)
 
 
     all_tasks = graphene.List(task_type)
-    task = graphene.Field(task_type, id=graphene.ID())
+    task = graphene.Field(task_type, task_id=graphene.ID())
 
     def resolve_all_tasks(self, info, **kwargs):
         # rudisha all tasks assigned
         return task.objects.all()
-    def resolve_task(self, info, **kwargs):
+    def resolve_task(self, info, task_id):
         # return a selected task
-        return task.objects.get(pk=id)
+        return task.objects.get(pk=task_id)
 
 
     all_staffs= graphene.List(staff_type)
-    staff = graphene.Field(staff_type, id=graphene.ID())
+    staff = graphene.Field(staff_type, staff_id=graphene.ID())
 
     def resolve_all_staffs(self, info, **kwargs):
         # return all staffs
         return staff.objects.all()
-    def resolve_staff(self, info, id):
+    def resolve_staff(self, info, staff_id):
         # a function to return a staff
-        return staff.objects.get(pk=id)
+        return staff.objects.get(pk=staff_id)
 
 
     all_users = graphene.List(user_type)
-    user = graphene.Field(user_type, id=graphene.ID())
+    user = graphene.Field(user_type, user_id=graphene.ID())
 
     def resolve_all_users(self, info, **kwargs):
         # a resolver fuction to return all users of the system
         return user.objects.all()
-    def resolve_user(self, info, id):
+    def resolve_user(self, info, user_id):
         # a function to return a single selected user
-        return user.objects.get(pk=id)
+        return user.objects.get(pk=user_id)
 
 
 
@@ -101,23 +102,23 @@ class CreateStudent(graphene.Mutation):
         student_degree_program = graphene.String()
         student_gender = graphene.String()
 
+
     student = graphene.Field(student_type)
 
     def mutate(self, info, student_reg_number, student_fingerprint_id,
                student_first_name , student_middle_name, student_surname,
                student_degree_program,student_gender):
 
-        student = student.objects.create(
-            student_reg_number = student_reg_number,
-            student_first_name = student_first_name,
-            student_middle_name = student_middle_name,
-            student_surname =student_surname,
-            student_fingerprint_id = student_fingerprint_id,
-            student_degree_program = student_degree_program,
-            student_gender=student_gender)
+        createdStudent = student.objects.create(
+        student_reg_number = student_reg_number,
+        student_first_name = student_first_name,
+        student_middle_name = student_middle_name,
+        student_surname =student_surname,
+        student_fingerprint_id = student_fingerprint_id,
+        student_degree_program = student_degree_program,
+        student_gender=student_gender)
 
-        student.save()
-        return CreateStudent( student = student)
+        return CreateStudent( student = createdStudent)
 
 
 class UpdateStudent(graphene.Mutation):
@@ -134,7 +135,7 @@ class UpdateStudent(graphene.Mutation):
 
     def mutate(self, info, student_reg_number, student_first_name =None, student_middle_name=None, student_surname =None, student_degree_program =None, student_gender =None):
 
-        student = student.objects.get(pk=student_reg_number)
+        updatedStudent = student.objects.get(pk=student_reg_number)
 
         student.student_first_name = student_first_name if student_first_name is not None else student.student_first_name
         student.student_middle_name = student_middle_name if student_middle_name is not None else student.student_middle_name
@@ -143,7 +144,7 @@ class UpdateStudent(graphene.Mutation):
         student.student_gender=student_gender if student_gender is not None else student.student_gender
 
         student.save()
-        return UpdateStudent( student = student)
+        return UpdateStudent( student = updatedStudent)
 
 
 class DeleteStudent(graphene.Mutation):
@@ -156,10 +157,10 @@ class DeleteStudent(graphene.Mutation):
 
     def mutate(self, info, id):
 
-        student = student.objects.get(pk=id)
+        deletedStudent = student.objects.get(pk=id)
         if student is not None:
-            student.delete()
-        return DeleteStudent(student = student)
+            deletedStudent.delete()
+        return DeleteStudent(student = deletedStudent)
 
 
 
@@ -168,7 +169,7 @@ class DeleteStudent(graphene.Mutation):
 class CreateStaff(graphene.Mutation):
 
     class  Arguments:
-        staff_id= graphene.ID()
+        staff_id= graphene.ID(required = True)
         staff_first_name= graphene.String()
         staff_middle_name= graphene.String()
         staff_surname= graphene.String()
@@ -176,11 +177,12 @@ class CreateStaff(graphene.Mutation):
         staff_role= graphene.String()
         staff_gender = graphene.String()
 
+
     staff = graphene.Field(staff_type)
 
     def mutate(self, info, staff_id, staff_first_name,staff_middle_name,staff_surname,staff_office,staff_role,staff_gender):
 
-        staff = staff.objects.create (
+        createdStaff = staff.objects.create (
             staff_id = staff_id,
             staff_first_name = staff_first_name,
             staff_middle_name = staff_middle_name,
@@ -189,8 +191,8 @@ class CreateStaff(graphene.Mutation):
             staff_role = staff_role,
             staff_gender = staff_gender)
 
-        staff.save()
-        return CreateStaff( staff = staff)
+
+        return CreateStaff( staff = createdStaff)
 
 
 class UpdateStaff(graphene.Mutation):
@@ -208,7 +210,7 @@ class UpdateStaff(graphene.Mutation):
 
     def mutate(self, info, staff_id, staff_first_name = None,staff_middle_name= None, staff_surname= None,staff_office = None,staff_role = None,staff_gender = None):
 
-        staff = staff.objects.get(pk=staff_id)
+        updatedStaff = staff.objects.get(pk=staff_id)
 
         staff.staff_first_name = staff_first_name if staff_first_name is not None else  staff.staff_first_name
         staff.staff_middle_name =staff_middle_name if staff_middle_name is not None else staff.staff_middle_name
@@ -218,7 +220,7 @@ class UpdateStaff(graphene.Mutation):
         staff.staff_gender = staff_gender if staff_gender is not None else staff.staff_gender
 
         staff.save()
-        return UpdateStaff( staff = staff)
+        return UpdateStaff( staff = updatedStaff)
 
 
 class DeleteStaff(graphene.Mutation):
@@ -231,10 +233,10 @@ class DeleteStaff(graphene.Mutation):
 
     def mutate(self, info, id):
 
-        staff = staff.objects.get(pk=id)
+        deletedStaff = staff.objects.get(pk=id)
         if staff is not None:
-            staff.delete()
-            return DeleteStaff(staff = staff)
+            deletedStaff.delete()
+            return DeleteStaff(staff = deletedStaff)
 
 
 
@@ -264,7 +266,7 @@ class CreateAppointment(graphene.Mutation):
                     appointment_description, appointment_type, appointment_category,
                     staff_phone_number, student_phone_number):
 
-        staff = staff.objects.create (
+        createdAppointment = staff.objects.create (
         appointment_time = appointment_time,
         appointment_status = appointment_status,
         appointment_description = appointment_description,
@@ -275,8 +277,7 @@ class CreateAppointment(graphene.Mutation):
         )
 
 
-        appointment.save()
-        return CreateAppointment( appointment = appointment)
+        return CreateAppointment( appointment = createdAppointment)
 
 
 class UpdateAppointment(graphene.Mutation):
@@ -298,7 +299,7 @@ class UpdateAppointment(graphene.Mutation):
 
     def mutate(self, info,appointment_id, appointment_time = None, appointment_status= None,appointment_description = None, appointment_type = None, appointment_category = None,               staff_phone_number = None, student_phone_number = None):
 
-        appointment = appointment.objects.get(pk=appointment_id)
+        updatedAppointment = appointment.objects.get(pk=appointment_id)
 
         appointment.appointment_time = appointment_time if appointment_time is not None else  appointment.appointment_time
         appointment.appointment_status = appointment_status if appointment_status is not None else appointment.appointment_status
@@ -309,7 +310,7 @@ class UpdateAppointment(graphene.Mutation):
         appointment.student_phone_number = student_phone_number if student_phone_number is not None else appointment.student_phone_number
 
         appointment.save()
-        return UpdateAppointment( appointment = appointment)
+        return UpdateAppointment( appointment = updatedAppointment )
 
 
 class DeleteAppointment(graphene.Mutation):
@@ -322,10 +323,10 @@ class DeleteAppointment(graphene.Mutation):
 
     def mutate(self, info, id):
 
-        appointment = appointment.objects.get(pk=id)
+        deletedAppointment = appointment.objects.get(pk=id)
         if appointment is not None:
             appointment.delete()
-        return DeleteAppointment(appointment = appointment)
+        return DeleteAppointment(appointment = deletedAppointment)
 
 
 
@@ -337,31 +338,28 @@ class CreateTask(graphene.Mutation):
 
     class  Arguments:
 
-        task_issue_date= graphene.types.datetime.DateTime()
+        task_issue_date= graphene.Date()
         # task_feedback_file= graphene.FileField()
         task_type=  graphene.String()
         task_description= graphene.String()
-        staff_id= graphene.String()
-        appointment_id= graphene.String()
 
 
     task = graphene.Field(task_type)
 
     def mutate(self, task_issue_date, task_type,
-        task_description, staff_id, appointment_id, task_feedback_file = None):
+        task_description, task_feedback_file = None):
 
-        task = task.objects.create (
+        createdTask= task.objects.create (
 
         task_issue_date= task_issue_date,
         task_feedback_file= task_feedback_file,
         task_type=  task_type,
         task_description=task_description,
-        staff_id= staff_id,
-        appointment_id= appointment_id)
+)
 
 
         task.save()
-        return CreateTask( task = task)
+        return CreateTask( task = createdTask)
 
 
 class UpdateTask(graphene.Mutation):
@@ -380,7 +378,7 @@ class UpdateTask(graphene.Mutation):
     def mutate(self, info, task_id, task_type = None,
         task_description= None, staff_id = None, task_feedback_file = None):
 
-        task = task.objects.get(pk=task_id)
+        updatedTask = task.objects.get(pk=task_id)
 
         task.task_type = task_type if task_type is not None else  task.task_type
         task.task_description = task_description if task_description is not None else task.task_task_description
@@ -388,7 +386,7 @@ class UpdateTask(graphene.Mutation):
         task.task_feedback_file = task_feedback_file if task_feedback_file is not None else task_feedback_file
 
         task.save()
-        return UpdateTask( task = task)
+        return UpdateTask( task = updatedTask)
 
 
 class DeleteTask(graphene.Mutation):
@@ -401,14 +399,14 @@ class DeleteTask(graphene.Mutation):
 
     def mutate(self, info, id):
 
-        task = task.objects.get(pk=id)
+        deletedTask = task.objects.get(pk=id)
         if task is not None:
-            task.delete()
-        return DeleteTask(task = task)
+            deletedTask.delete()
+        return DeleteTask(task = deletedTask)
 
 
 
-# -----------> TASK-TABLE-MUTATIONS----------
+# -----------> user-TABLE-MUTATIONS----------
 
 class CreateUser(graphene.Mutation):
 
@@ -420,15 +418,14 @@ class CreateUser(graphene.Mutation):
 
     user = graphene.Field(user_type)
 
-    def mutate(self, user_phone_number,user_password):
+    def mutate(self,  info, user_phone_number,user_password):
 
-        user = task.objects.create (
-
+        createdUser = user.objects.create (
         user_phone_number= user_phone_number,
-        user_password = user_password,
+        user_password = user_password
         )
-        user.save()
-        return CreateUser( user = user)
+
+        return CreateUser( user = createdUser)
 
 
 class UpdateUser(graphene.Mutation):
@@ -443,13 +440,13 @@ class UpdateUser(graphene.Mutation):
 
     def mutate(self, info, user_id, user_phone_number = None, user_password = None):
 
-        user = user.objects.get(pk=user_id)
+        updatedUser = user.objects.get(pk=user_id)
 
         user.user_phone_number = user_phone_number if user_phone_number is not None else  user.user_phone_number
         user.user_password = user_password if user_password is not None else user.user_password
 
         user.save()
-        return UpdateUser( user = user)
+        return UpdateUser( user = updatedUser)
 
 
 class DeleteUser(graphene.Mutation):
@@ -462,10 +459,10 @@ class DeleteUser(graphene.Mutation):
 
     def mutate(self, info, id):
 
-        user = user.objects.get(pk=id)
+        deletedUser = user.objects.get(pk=id)
         if user is not None:
-            user.delete()
-        return DeleteUser(user = user)
+            deletedUser.delete()
+        return DeleteUser(user = deletedUser)
 
 
 

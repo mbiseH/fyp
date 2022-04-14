@@ -4,7 +4,7 @@ from django.db import models
 class student(models.Model):
     student_reg_number = models.CharField(max_length=100, primary_key= True)
     student_first_name = models.CharField(max_length=100)
-    student_middle_name = models.CharField(max_length=100,null= True)
+    student_middle_name = models.CharField(max_length=100, null=True)
     student_surname = models.CharField(max_length=100)
     student_degree_program = models.CharField(max_length=100)
     student_fingerprint_id = models.CharField(max_length=100)
@@ -14,11 +14,9 @@ class student(models.Model):
         return self.student_reg_number
 
 
-
-
 class staff (models.Model):
 
-    staff_id= models.CharField(max_length=100,primary_key=True)
+    staff_id= models.CharField(max_length=100, primary_key=True)
     staff_first_name= models.CharField(max_length=100)
     staff_middle_name= models.CharField(max_length=100, null =True)
     staff_surname= models.CharField(max_length=100)
@@ -51,7 +49,7 @@ class appointment(models.Model):
 class task (models.Model):
     task_id= models.BigAutoField(primary_key=True)
     task_issue_date= models.DateTimeField()
-    task_feedback_file= models.CharField(max_length= 100, null=True)
+    # task_feedback_file= models.CharField(max_length= 100, null=True)
     task_type= models.CharField(max_length=100)
     task_description= models.CharField(max_length=100)
     staff_id= models.ForeignKey(staff, on_delete=models.CASCADE)
@@ -60,17 +58,14 @@ class task (models.Model):
     def __str__(self):
         return self.task_id
 
-
-
-
-
 class user(models.Model):
     user_id= models.BigAutoField(primary_key=True)
     user_phone_number=models.IntegerField()
     user_password= models.CharField(max_length=100)
-    staff_username= models.ForeignKey(staff, on_delete=models.CASCADE)
-    student_username = models.ForeignKey(student, on_delete=models.CASCADE)
+    staff_username= models.ForeignKey(staff, on_delete=models.CASCADE, null=True)
+    student_username = models.ForeignKey(student, on_delete=models.CASCADE, null=True)
 
 
     def __str__(self):
         return self.user_id
+    
