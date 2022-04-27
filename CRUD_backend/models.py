@@ -61,9 +61,9 @@ class task (models.Model):
 
 class user(AbstractUser):
     
-    id = models.BigAutoField(primary_key=True, unique=True)
+    # id = models.BigAutoField(primary_key=True, unique=True)
     # user_phone_number=models.IntegerField()
-    user_email = models.EmailField(blank = False, unique = True, max_length=255)
+    # user_email = models.EmailField(blank = False,  max_length=255)
     USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
     # user_verification = models.BooleanField(default= "False")
@@ -74,7 +74,7 @@ class user(AbstractUser):
     # student_username = models.ForeignKey(student, on_delete=models.CASCADE, null=True)
 
 
-    def __str__(self):
-        return self.user_id
+    # def __str__(self):
+    #     return self.user_id
     
 #  https://www.youtube.com/watch?v=pyV2_F9wlk8
