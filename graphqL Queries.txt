@@ -228,3 +228,12 @@
 
 
 
+
+
+
+
+
+COMMIT GITHUB
+git add .
+git commit -m "feeding and retrieving data{appointment,staff,students,tasks}" 
+git push https://github.com/mbiseH/fyp

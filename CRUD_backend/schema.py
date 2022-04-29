@@ -255,12 +255,14 @@ class CreateAppointment(graphene.Mutation):
 
     class  Arguments:
 
-        appointment_time= graphene.String()
+        
         
         appointment_description= graphene.String()
         appointment_type=graphene.String()
         appointment_category= graphene.String()
         staff_phone_number= graphene.Int()
+        appointment_time = graphene.String()
+        appointment_date = graphene.String()
         student_phone_number= graphene.Int()
         student_reg_number= graphene.String()
         appointment_status=graphene.String()
@@ -268,9 +270,10 @@ class CreateAppointment(graphene.Mutation):
 
     appointment = graphene.Field(appointment_type)
 
-    def mutate(self, info, appointment_time,student_reg_number,
+    def mutate(self, info, appointment_time, appointment_date, student_reg_number,
                     
                      appointment_type, appointment_category,
+                     
                     staff_phone_number,staff_id, appointment_status,
                     appointment_description, student_phone_number):
         
@@ -280,10 +283,12 @@ class CreateAppointment(graphene.Mutation):
         createdAppointment = appointment.objects.create (
         appointment_time = appointment_time,
         appointment_status = appointment_status,
+       
     
         appointment_description = appointment_description,
         appointment_type = appointment_type,
         staff_id= staffobj,
+        appointment_date = appointment_date,
         
         student_reg_number=studentobj,
         appointment_category = appointment_category,
