@@ -22,6 +22,7 @@ class staff (models.Model):
     staff_middle_name= models.CharField(max_length=100, null =True)
     staff_surname= models.CharField(max_length=100)
     staff_office= models.CharField(max_length=100)
+    staff_role = models.CharField(max_length=100)
     staff_gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default='F')
 
     def __str__(self):
@@ -35,9 +36,11 @@ class appointment(models.Model):
     appointment_id= models.BigAutoField(primary_key=True)
     appointment_type=models.CharField(max_length=10,choices=(('Indiv', 'Individual'), ('Grp', 'Group')), default='Indiv')
     appointment_category= models.CharField (max_length=10, choices=(('Priv', 'Private'), ('Acad', 'Academic'), ('Other', 'Others')), default='Acad')
+    appointment_description = models.CharField (max_length=200)
     appointment_time = models.CharField(max_length= 20)
     staff_phone_number= models.IntegerField()
     student_phone_number= models.IntegerField()
+    appointment_status = models.CharField(max_length=15)
     student_reg_number= models.ForeignKey(student, on_delete=models.CASCADE)
     staff_id=models.ForeignKey(staff, on_delete=models.CASCADE)
 
