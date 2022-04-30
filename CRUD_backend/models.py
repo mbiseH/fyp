@@ -34,12 +34,11 @@ class staff (models.Model):
 class appointment(models.Model):
 
     appointment_id = models.BigAutoField(primary_key=True)
-    appointment_type = models.CharField(max_length=10,choices=(('Indiv', 'Individual'), ('Grp', 'Group')), default='Indiv')
-    appointment_category = models.CharField (max_length=10, choices=(('Priv', 'Private'), ('Acad', 'Academic'), ('Other', 'Others')), default='Acad')
+    appointment_type = models.CharField(max_length=20)
+    appointment_category = models.CharField (max_length=10)
     appointment_description = models.CharField (max_length=200)
-    
-    appointment_time = models.TimeField(auto_now=False)
-    appointment_date = models.DateField(auto_now=True)
+    appointment_time = models.TimeField()
+    appointment_date = models.DateField()
     staff_phone_number= models.IntegerField()
     student_phone_number= models.IntegerField()
     appointment_status = models.CharField(max_length=15)
@@ -54,12 +53,15 @@ class appointment(models.Model):
 
 class task (models.Model):
     task_id= models.BigAutoField(primary_key=True)
-    task_issue_date= models.CharField(max_length = 20)
+    task_issue_date= models.DateField()
+    task_deadline_date= models.DateField()
     task_feedback_file= models.CharField(max_length= 100, null=True)
     task_type= models.CharField(max_length=100)
     task_description= models.CharField(max_length=100)
     staff_id= models.ForeignKey(staff, on_delete=models.CASCADE)
-    appointment_id= models.ForeignKey(appointment, on_delete=models.CASCADE)
+    appointment_id = models.ForeignKey(appointment, on_delete=models.CASCADE)
+    
+
 
     def __str__(self):
         return self.task_id
@@ -81,5 +83,3 @@ class user(AbstractUser):
 
     # def __str__(self):
     #     return self.user_id
-    
-#  https://www.youtube.com/watch?v=pyV2_F9wlk8
