@@ -34,6 +34,7 @@ class Query(graphene.ObjectType):
     def resolve_all_students(self, info, **kwargs):
         # Querying a list of all students
         return student.objects.all()
+
     def resolve_student(self, info, student_reg_number):
         # Querying a single student here wazeee
         return student.objects.get(pk=student_reg_number)
@@ -48,12 +49,15 @@ class Query(graphene.ObjectType):
     def resolve_all_apppointments(self, info , **kwargs):
         # Querying a list of all appointments
         return appointment.objects.all()
+
     def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
         return appointment.objects.get(pk=appointment_id)
+
     def resolve_student_appointment(self, info, student_reg_number):
         #Appointment zote za mwanafunzi mmoja {User}
         return appointment.objects.filter(student_reg_number=student_reg_number)
+
     def resolve_staff_appointment(self, info, staff_id):
         #return appointment Done By a A single Staff member{User}
         return appointment.objects.filter(staff_id=staff_id)
@@ -65,6 +69,7 @@ class Query(graphene.ObjectType):
     def resolve_all_tasks(self, info, **kwargs):
         # rudisha all tasks assigned
         return task.objects.all()
+        
     def resolve_task(self, info, task_id):
         # return a selected task
         return task.objects.get(pk=task_id)
