@@ -79,5 +79,41 @@ class user(AbstractUser):
 
     # def __str__(self):
     #     return self.user_id
+   
+   
     
-#  https://www.youtube.com/watch?v=pyV2_F9wlk8
+# <----------------SOME CODES TO UPLOAD FILE------------
+
+
+# from graphene_file_upload.scalars import Upload
+# from django.core.files.storage import FileSystemStorage
+# class UploadMutation(graphene.Mutation):
+#     class Arguments:
+#         file = Upload(required=True)
+
+#     success = graphene.Boolean()
+#     full_file_name = graphene.String()
+#     file_name = graphene.String()
+
+#     def mutate(self, info, file, **kwargs):
+#         new_folder = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+#         try:
+#             os.mkdir(os.path.join(str(settings.MEDIA_ROOT)+'/documents/', new_folder))
+#             fs = FileSystemStorage(location=str(settings.MEDIA_ROOT)+'/documents/'+new_folder)
+#         except:
+#             fs = FileSystemStorage(location=str(settings.MEDIA_ROOT)+'/documents/'+new_folder)
+
+#         new_file_name,ext=os.path.splitext(file.name)
+#         modified_name = '{}_{}'.format(uuid.uuid4().hex[:24], "_"+new_file_name+""+ext)
+
+#         new_attachment=fs.save(modified_name, file)
+#         uploaded_file_url = fs.url('/documents/'+new_folder+"/"+new_attachment)
+        
+#         save_path = os.path.join(str(settings.MEDIA_ROOT)+'/documents/'+new_folder,str(modified_name))
+#         saved_file_name, file_extension=os.path.splitext(save_path)
+
+#         full_file_name=str(uploaded_file_url)
+#         file_name=file.name
+
+#         return UploadMutation(success=True,full_file_name=full_file_name,file_name=file_name)
