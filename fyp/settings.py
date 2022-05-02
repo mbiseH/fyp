@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from pickle import TRUE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,6 +61,7 @@ GRAPHQL_JWT = {
         "graphql_auth.mutations.RefreshToken",
         "graphql_auth.mutations.RevokeToken",
         "graphql_auth.mutations.VerifySecondaryEmail",
+         "corsheaders",   
     ],
 }
 
@@ -79,11 +81,16 @@ INSTALLED_APPS = [
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     'CRUD_backend',
     'django_filters',
-    "graphql_auth"
+    "graphql_auth",
+    "corsheaders",
     
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -114,26 +121,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fyp.wsgi.application'
 
-
+# allowing external from from front end
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+  'http://localhost:8080',
+)
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-
-
         'default': {
-
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'fyp',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'PASSWORD': 'edwin',
         'HOST': 'localhost',
         # 'PORT': '5432',
         # 'HOST': '<db_host>',
 
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
