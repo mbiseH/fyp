@@ -39,15 +39,15 @@ class Query(graphene.ObjectType):
         # Querying a single student here wazeee
         return student.objects.get(pk=student_reg_number)
 
-
-    all_appointments = graphene.List(appointment_type)
+    zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     appointment = graphene.Field(appointment_type, appointment_id=graphene.ID())
     student_appointment = graphene.List(appointment_type, student_reg_number=graphene.String())
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
 
 
-    def resolve_all_apppointments(self, info , **kwargs):
-        # Querying a list of all appointments
+
+    def resolve_zote_appointments(self, info, staff_id):
+        #return appointment Done By a A single Staff member{User}
         return appointment.objects.all()
 
     def resolve_appointment(self, info, appointment_id):

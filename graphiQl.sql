@@ -81,9 +81,8 @@ mutation createAppointment
   }
 }
 
-
-query allAppointments{
-  allAppointments
+query AppointmentZote{
+  zoteAppointments(staffId:"1")
   { 
   appointmentStatus
   }
