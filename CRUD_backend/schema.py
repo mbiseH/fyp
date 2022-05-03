@@ -1,13 +1,12 @@
 import graphene
 from graphene_django import DjangoObjectType
-from CRUD_backend.models import student, appointment, task, staff, user
+from CRUD_backend.models import student, appointment, task, staff, complain
 
 
 
 class student_type(DjangoObjectType):
     class Meta:
         model = student
-
 
 class appointment_type(DjangoObjectType):
     class Meta:
@@ -20,6 +19,12 @@ class task_type(DjangoObjectType):
 class staff_type(DjangoObjectType):
     class Meta:
         model = staff
+
+class complain_type (DjangoObjectType):
+    class Meta:
+        model = complain
+   
+
 
 # class  user_type(DjangoObjectType):
 #     class Meta:
@@ -39,12 +44,28 @@ class Query(graphene.ObjectType):
         # Querying a single student here wazeee
         return student.objects.get(pk=student_reg_number)
 
+
+    all_complains = graphene.List(complain_type)
+    complain = graphene.Field(complain_type, complain_id = graphene.ID())
+    complain_to_staff = graphene.List(complain_type, staff_id = graphene.String())
+    
+    def resolve_all_complains(self, info, **kwargs):
+        #turudishie Complains Zote
+        return complain.objects.all()
+    
+    def resolve_complain(self, info, complain_id):
+        #tupe complain moja tu
+        return complain.objects.get(pk=complain_id)
+    
+    def  resolve_staff_complains(self, info, staff_id):
+        #rudisha complain za mwalimu fulani tu
+        return complain.objects.filter(staff_id = staff_id)
+   
+   
     zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     appointment = graphene.Field(appointment_type, appointment_id=graphene.ID())
     student_appointment = graphene.List(appointment_type, student_reg_number=graphene.String())
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
-
-
 
     def resolve_zote_appointments(self, info, staff_id):
         #return appointment Done By a A single Staff member{User}
@@ -347,6 +368,70 @@ class DeleteAppointment(graphene.Mutation):
 
 
 
+# -----------> COMPLAIN-TABLE-MUTATIONS----------
+
+class CreateComplain(graphene.Mutation):
+    
+    class  Arguments:
+        complain_description = graphene.String()
+        complain_to_staff = graphene.String()
+        complain_from_appointment = graphene.String()
+        
+    complain = graphene.Field(complain_type)
+
+    def mutate(self, info, complain_description, complain_to_staff, complain_from_appointment):
+
+        staff_obj= staff.objects.get(pk=complain_to_staff)
+        appointment_obj= appointment.objects.get(pk=complain_from_appointment)
+
+        createdComplain= complain.objects.create (
+            complain_description = complain_description,
+            complain_to_staff = staff_obj,
+            complain_from_appointment = appointment_obj )
+
+        return CreateComplain( complain = createdComplain)
+
+
+class UpdateComplain(graphene.Mutation):
+
+    class  Arguments:
+        complain_id = graphene.ID()
+        complain_description= graphene.String()
+        complain_to_staff = graphene.String()
+        complain_from_appointment = graphene.String()
+        
+    complain = graphene.Field(complain_type)
+
+    def mutate(self, info, complain_id, complain_description = None , complain_to_staff = None, complain_from_appointment= None):
+
+        updatedComplain = complain.objects.get(pk=complain_id)
+        appointment_obj = appointment.objects.get(pk=complain_from_appointment)
+        staff_object = staff.objects.get(pk = complain_to_staff)
+
+        updatedComplain.complain_description = complain_description if complain_description is not None else  updatedComplain.complain_description
+        updatedComplain.staff_object = staff_object if staff_object is not None else updatedComplain.complain_to_staff
+        updatedComplain.staff_id = appointment_obj if appointment_obj is not None else updatedComplain.complain_from_appointment
+       
+        return UpdateComplain( complain = updatedComplain)
+
+
+class DeleteComplain(graphene.Mutation):
+
+    class Arguments:
+
+        complain_id = graphene.ID()
+
+    complain = graphene.Field(complain_type)
+
+    def mutate(self, info, complain_id):
+
+        deletedComplain= complain.objects.get(pk=complain_id)
+        if task is not None:
+            deletedComplain.delete()
+        return DeleteComplain(complain = deletedComplain)
+
+
+
 
 
 # -----------> TASK-TABLE-MUTATIONS----------
@@ -513,7 +598,11 @@ class Mutation(graphene.ObjectType):
     create_student = CreateStudent.Field()
     update_student = UpdateStudent.Field()
     delete_student = DeleteStudent.Field()
-
+    
+    create_complain = CreateComplain.Field()
+    update_complain = UpdateComplain.Field()
+    delete_Complain = DeleteComplain.Field()
+  
     create_appointment = CreateAppointment.Field()
     update_appointment = UpdateAppointment.Field()
     delete_appointment = DeleteAppointment.Field()

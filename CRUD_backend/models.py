@@ -41,13 +41,27 @@ class appointment(models.Model):
     appointment_date = models.DateField()
     staff_phone_number= models.IntegerField()
     student_phone_number= models.IntegerField()
-    appointment_status = models.CharField(max_length=15)
+    appointment_status = models.CharField(max_length=15, default="Pending")
     student_reg_number= models.ForeignKey(student, on_delete=models.CASCADE)
     staff_id=models.ForeignKey(staff, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.appointment_id
 
+
+
+class complain(models.Model):
+
+    complain_id = models.BigAutoField(primary_key=True)
+    complain_status = models.CharField(max_length=20, default= "Pending")
+    complain_is_new = models.BooleanField(default=True)
+    complain_description = models.CharField(max_length= 255)
+    complain_creation_date = models.DateTimeField(auto_now_add=True)
+    complain_to_staff = models.ForeignKey(staff, on_delete=models.CASCADE)
+    complain_from_appointment = models.ForeignKey(appointment, on_delete=models.CASCADE)
+    
+    def __str__(self):
+            return self.complain_id
 
 
 
