@@ -81,10 +81,16 @@ INSTALLED_APPS = [
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     'CRUD_backend',
     'django_filters',
+    "django_extensions",
     "graphql_auth",
     "corsheaders",
-    
 ]
+
+
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

@@ -1,3 +1,7 @@
+# python manage.py graph_models --pydot -a -g -o fypDBmodels.png
+
+
+
 # mutation{
 #   register(
 #     email:"gado98@gmail.com"
