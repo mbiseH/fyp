@@ -229,19 +229,6 @@ python manage.py graph_models --pydot -a -g -o fypDBmodels.png
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 COMMIT GITHUB
 git add .
 git commit -m "feeding and retrieving data{appointment,staff,students,tasks}" 
