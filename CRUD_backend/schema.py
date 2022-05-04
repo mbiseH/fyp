@@ -442,7 +442,6 @@ class CreateTask(graphene.Mutation):
 
     class  Arguments:
         
-        task_issue_date = graphene.Date()
         task_deadline_date = graphene.Date()
         task_feedback_file= graphene.String()
         task_type=  graphene.String()
@@ -453,14 +452,14 @@ class CreateTask(graphene.Mutation):
 
     task = graphene.Field(task_type)
 
-    def mutate(self, info, task_issue_date, task_deadline_date ,appointment_id, staff_id, task_type, task_description, task_feedback_file = None):
+    def mutate(self, info, task_deadline_date ,appointment_id, staff_id, task_type, task_description, task_feedback_file = None):
 
         staff_obj= staff.objects.get(pk=staff_id)
         appointment_obj= appointment.objects.get(pk=appointment_id)
 
         createdTask= task.objects.create (
         appointment_id= appointment_obj,
-        task_issue_date= task_issue_date,
+        task_issue_date= appointment_obj.appointment_date ,
         task_feedback_file= task_feedback_file,
         task_type= task_type,
         staff_id= staff_obj,

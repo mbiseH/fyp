@@ -45,8 +45,7 @@ python manage.py graph_models --pydot -a -g -o fypDBmodels.png
 #   staffId:"6"
 #   staffMiddleName:"TUMAINI"
 #   staffOffice:"H_AB 024"
-#   staffSurname
-#   :"MWAISA"
+#   staffSurname:"MWAISA"
   
 # )
 #   {

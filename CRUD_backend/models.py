@@ -35,6 +35,7 @@ class appointment(models.Model):
 
     appointment_id = models.BigAutoField(primary_key=True)
     appointment_type = models.CharField(max_length=20)
+    is_New = models.BooleanField(default=True)
     appointment_category = models.CharField (max_length=10)
     appointment_description = models.CharField (max_length=200)
     appointment_time = models.TimeField()
@@ -75,21 +76,19 @@ class task (models.Model):
     staff_id= models.ForeignKey(staff, on_delete=models.CASCADE)
     appointment_id = models.ForeignKey(appointment, on_delete=models.CASCADE)
     
-
-
     def __str__(self):
         return self.task_id
 
+
 class user(AbstractUser):
-    
+    user_id = models.CharField(max_length= 100, unique=True)
     user_password_reset_code = models.CharField(max_length= 20, blank = True)
     user_role = models.CharField(max_length= 100, default="student", blank=False)
     staff_username= models.ForeignKey(staff, on_delete=models.CASCADE, null=True)
     student_username = models.ForeignKey(student, on_delete=models.CASCADE, null=True)
-    # EMAIL_FIELD = "email"
-    # USERNAME_FIELD = "staff_username, student_username"
+    EMAIL_FIELD = "email"
+    USERNAME_FIELD = "user_id"
     
-
     def __str__(self):
         return self.user_id
 
