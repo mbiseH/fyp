@@ -1,4 +1,10 @@
-# python manage.py graph_models --pydot -a -g -o fypDBmodels.png
+
+DEPENDENCIES
+Download from https://www.graphviz.org/download/
+pip install django_extensions
+install pyparsing pydot
+
+python manage.py graph_models --pydot -a -g -o fypDBmodels.png
 
 
 
