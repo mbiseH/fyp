@@ -81,14 +81,15 @@ class task (models.Model):
 
 
 class user(AbstractUser):
-    user_id = models.CharField(max_length= 100, unique=True)
-    user_password_reset_code = models.CharField(max_length= 20, blank = True)
-    user_role = models.CharField(max_length= 100, default="student", blank=False)
-    staff_username= models.ForeignKey(staff, on_delete=models.CASCADE, null=True)
-    student_username = models.ForeignKey(student, on_delete=models.CASCADE, null=True)
+    # user_id = models.CharField(max_length= 100, unique=True)
+    # user_password_reset_code = models.CharField(max_length= 20, blank = True)
+    # user_role = models.CharField(max_length= 100, default="student", blank=False)
+    # staff_username= models.ForeignKey(staff, on_delete=models.CASCADE, null=True)
+    # student_username = models.ForeignKey(student, on_delete=models.CASCADE, null=True)
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "user_id"
+    USERNAME_FIELD = "username"
     
     def __str__(self):
         return self.user_id
+
 

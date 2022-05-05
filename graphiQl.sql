@@ -12,9 +12,21 @@ token
 refreshToken
 }
 }
+query ZoteZote{
+  zoteAppointments
+  { 
+  appointmentStatus
+  }
+}
+
+
+query jkljhkhk{
+  countNewAppointments
+}
+
 mutation createStudent{
 	createStudent(studentDegreeProgram:"TE"
-  studentRegNumber:"2"
+  studentRegNumber:""
   studentGender:"F"
   studentFirstName:"ALISIA"
   studentFingerprintId:"wiccllxxa888 stay here"
@@ -69,7 +81,7 @@ mutation createAppointment
     appointmentCategory:"priv"
     appointmentStatus:"missed"
     staffId:"2"
-    studentRegNumber: "1"
+    studentRegNumber: "2"
     staffPhoneNumber: 68920677
 		studentPhoneNumber: 994677857
   )
@@ -80,18 +92,31 @@ mutation createAppointment
     }
   }
 }
-
-query AppointmentZote{
-  zoteAppointments(staffId:"1")
-  { 
-  appointmentStatus
+mutation UPdateAPPOINTMENT{
+  updateAppointment(appointmentId:"2", appointmentStatus: "success")
+  {
+    appointment
+    {
+      appointmentStatus
+    }
+    
   }
+  
 }
 
 
+query AllAPoint{
+  allAppointments
+  { 
+  appointmentStatus
+    appointmentId
+    
+  }
+}
+
  # pull data from Various tables
 query ViewAppointmentID{
-  appointment(appointmentId:"1")
+  appointment(appointmentId:"2")
 {
  appointmentDescription
   appointmentCategory
@@ -104,6 +129,7 @@ query ViewAppointmentID{
     studentDegreeProgram
     studentFingerprintId
   }
+  appointmentStatus
   staffId{
     staffOffice
     staffGender
@@ -160,6 +186,14 @@ query ViewStaffIDAppointment{
   }
 }
 
+mutation deleAPoint{
+  deleteAppointment(id:"3")
+  {
+    appointment{
+      appointmentDate
+    }
+  }
+}
 
 query allTasks{
   allTasks{
@@ -177,7 +211,7 @@ mutation createTask{
     taskType:"deployment"
     taskDeadlineDate:"2022-02-22"
     staffId:"2"
-    taskIssueDate:"2022-02-26"
+    
   )
 {
   task{
@@ -188,8 +222,8 @@ mutation createTask{
 
 mutation updateTask
 {
-updateTask(appointmentId:"4"
-taskId:8
+updateTask(appointmentId:"2"
+taskId:1
 taskDescription:"waosha karoti nyie kuweni wa poleeee") 
   {
     task{
@@ -198,9 +232,11 @@ taskDescription:"waosha karoti nyie kuweni wa poleeee")
         studentRegNumber{studentFirstName}
       }
       taskId
+      taskDescription
     }
   }
 }
+
 
 query ViewTaskD{
     task(taskId:"2") {

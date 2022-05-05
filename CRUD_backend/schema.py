@@ -64,16 +64,16 @@ class Query(graphene.ObjectType):
         return complain.objects.filter(staff_id = staff_id)
    
  
-    # zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
+    zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     appointment = graphene.Field(appointment_type, appointment_id=graphene.ID())
     all_appointments = graphene.List(appointment_type)
     student_appointment = graphene.List(appointment_type, student_reg_number=graphene.String())
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
     count_new_appointments = graphene.Int()
   
-    # def resolve_zote_appointments(self, info, staff_id):
-    #     #return appointment Done By a A single Staff member{User}
-    #     return appointment.objects.all()
+    def resolve_zote_appointments(self, info):
+        #return appointment Done By a A single Staff member{User}
+        return appointment.objects.all()
 
     def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
@@ -87,10 +87,10 @@ class Query(graphene.ObjectType):
         #return appointment Done By a A single Staff member{User}
         return appointment.objects.filter(staff_id=staff_id)
     
-    def resolve_all_appointments (self, info, **kwargs):
+    def resolve_all_appointments (self, info):
         return appointment.objects.all()
     
-    def resolve_count_new_appointments(self, info,):
+    def resolve_count_new_appointments(self, info):
         return appointment.objects.filter(is_New= True).count()
 
 
@@ -186,7 +186,7 @@ class UpdateStudent(graphene.Mutation):
         updatedStudent.student_surname =student_surname if student_surname is not None else updatedStudent.student_surname
         updatedStudent.student_degree_program = student_degree_program if student_degree_program is not None else updatedStudent.student_degree_program
         updatedStudent.student_gender=student_gender if student_gender is not None else updatedStudent.student_gender
-
+        UpdateStudent.save()
         return UpdateStudent( student = updatedStudent)
 
 
@@ -261,7 +261,7 @@ class UpdateStaff(graphene.Mutation):
         updatedStaff.staff_office = staff_office if staff_office is not None else updatedStaff.staff_office
         updatedStaff.staff_role = staff_role if staff_role is not None else updatedStaff.staff_role
         updatedStaff.staff_gender = staff_gender if staff_gender is not None else updatedStaff.staff_gender
-
+        UpdateStaff.save()
         return UpdateStaff( staff = updatedStaff)
 
 
@@ -357,7 +357,7 @@ class UpdateAppointment(graphene.Mutation):
         updatedAppointment.appointment_category = appointment_category if appointment_category is not None else updatedAppointment.appointment_category
         updatedAppointment.staff_phone_number = staff_phone_number if staff_phone_number is not None else updatedAppointment.staff_phone_number
         updatedAppointment.student_phone_number = student_phone_number if student_phone_number is not None else updatedAppointment.student_phone_number
-
+        updatedAppointment.save()
         return UpdateAppointment( appointment = updatedAppointment )
 
 
@@ -373,7 +373,7 @@ class DeleteAppointment(graphene.Mutation):
 
         deletedAppointment = appointment.objects.get(pk=id)
         if appointment is not None:
-            appointment.delete()
+            deletedAppointment.delete()
         return DeleteAppointment(appointment = deletedAppointment)
 
 
@@ -421,7 +421,7 @@ class UpdateComplain(graphene.Mutation):
         updatedComplain.complain_description = complain_description if complain_description is not None else  updatedComplain.complain_description
         updatedComplain.staff_object = staff_object if staff_object is not None else updatedComplain.complain_to_staff
         updatedComplain.staff_id = appointment_obj if appointment_obj is not None else updatedComplain.complain_from_appointment
-       
+        UpdateComplain.save()
         return UpdateComplain( complain = updatedComplain)
 
 
@@ -476,9 +476,8 @@ class CreateTask(graphene.Mutation):
 
         return CreateTask( task = createdTask)
 
-
 class UpdateTask(graphene.Mutation):
-
+    
     class  Arguments:
 
         task_id= graphene.ID()
@@ -502,7 +501,7 @@ class UpdateTask(graphene.Mutation):
         updatedTask.staff_id = staff_id if staff_id is not None else updatedTask.staff_id
         updatedTask.appointment_id = appointment_obj if appointment_id is not None else updatedTask.appointment_id
         updatedTask.task_feedback_file = task_feedback_file if task_feedback_file is not None else updatedTask.task_feedback_file
-
+        updatedTask.save()
         return UpdateTask( task = updatedTask)
 
 
