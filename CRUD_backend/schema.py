@@ -63,15 +63,17 @@ class Query(graphene.ObjectType):
         #rudisha complain za mwalimu fulani tu
         return complain.objects.filter(staff_id = staff_id)
    
-   
-    zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
+ 
+    # zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     appointment = graphene.Field(appointment_type, appointment_id=graphene.ID())
+    all_appointments = graphene.List(appointment_type)
     student_appointment = graphene.List(appointment_type, student_reg_number=graphene.String())
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
-
-    def resolve_zote_appointments(self, info, staff_id):
-        #return appointment Done By a A single Staff member{User}
-        return appointment.objects.all()
+    count_new_appointments = graphene.Int()
+  
+    # def resolve_zote_appointments(self, info, staff_id):
+    #     #return appointment Done By a A single Staff member{User}
+    #     return appointment.objects.all()
 
     def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
@@ -84,6 +86,12 @@ class Query(graphene.ObjectType):
     def resolve_staff_appointment(self, info, staff_id):
         #return appointment Done By a A single Staff member{User}
         return appointment.objects.filter(staff_id=staff_id)
+    
+    def resolve_all_appointments (self, info, **kwargs):
+        return appointment.objects.all()
+    
+    def resolve_count_new_appointments(self, info,):
+        return appointment.objects.filter(is_New= True).count()
 
 
     all_tasks = graphene.List(task_type)

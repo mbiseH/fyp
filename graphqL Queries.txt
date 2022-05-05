@@ -68,19 +68,20 @@ python manage.py graph_models --pydot -a -g -o fypDBmodels.png
 # }
 
 
+# 
 # mutation mbise
 # {
 #   createAppointment(
     
    
-#   appointmentTime:"20-11-2022"
+#   appointmentTime:"14:00"
 #     appointmentType:"Indiv"
-#     appointmentDescription:"njoo chapu kuna kesi ya maumbile"
-  
+#     appointmentDescription:"blah blah blah "
+#   appointmentDate:"2022-02-11"
 #   appointmentCategory:"priv"
-#     appointmentStatus:"missed"
-#     staffId:"4"
-#     studentRegNumber: "6"
+#     appointmentStatus:"pending"
+#     staffId:"1"
+#     studentRegNumber: "1"
    
 #     staffPhoneNumber: 692067745
 # 		studentPhoneNumber: 746778585
@@ -88,11 +89,10 @@ python manage.py graph_models --pydot -a -g -o fypDBmodels.png
 #   {
 #     appointment
 #     {
-#       appointmentDescription
+#       appointmentId
 #     }
 #   }
 # }
-
 
 # {
 #   allAppointments(staffId:"9")
