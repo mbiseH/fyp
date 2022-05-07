@@ -1,4 +1,8 @@
+import os
 import graphene
+from datetime import datetime, timedelta
+from twilio.rest import Client
+from asyncio.windows_events import NULL
 from graphene_django import DjangoObjectType
 from graphene_file_upload.scalars import Upload
 from django.core.files.storage import FileSystemStorage
@@ -37,6 +41,7 @@ class Query(graphene.ObjectType):
 
     all_students = graphene.List(student_type)
     student = graphene.Field(student_type, student_reg_number = graphene.ID())
+    search_students_by_group = graphene.List(student_type, student_associated_group_name= graphene.String())
 
     def resolve_all_students(self, info, **kwargs):
         # Querying a list of all students
@@ -45,11 +50,15 @@ class Query(graphene.ObjectType):
     def resolve_student(self, info, student_reg_number):
         # Querying a single student here wazeee
         return student.objects.get(pk=student_reg_number)
+    
+    def resolve_search_students_by_group(self, info, student_associated_group_name):
+        return student.objects.filter(student_associated_group_name = student_associated_group_name)
 
 
     all_complains = graphene.List(complain_type)
     complain = graphene.Field(complain_type, complain_id = graphene.ID())
     complain_to_staff = graphene.List(complain_type, staff_id = graphene.String())
+    count_new_complains = graphene.Int()
     
     def resolve_all_complains(self, info, **kwargs):
         #turudishie Complains Zote
@@ -59,21 +68,21 @@ class Query(graphene.ObjectType):
         #tupe complain moja tu
         return complain.objects.get(pk=complain_id)
     
+    def resolve_count_new_complains(self, info):
+        return complain.objects.filter(complain_is_new= True).count()
+    
     def  resolve_staff_complains(self, info, staff_id):
         #rudisha complain za mwalimu fulani tu
         return complain.objects.filter(staff_id = staff_id)
    
  
-    zote_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     appointment = graphene.Field(appointment_type, appointment_id=graphene.ID())
     all_appointments = graphene.List(appointment_type)
     student_appointment = graphene.List(appointment_type, student_reg_number=graphene.String())
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
     count_new_appointments = graphene.Int()
-  
-    def resolve_zote_appointments(self, info):
-        #return appointment Done By a A single Staff member{User}
-        return appointment.objects.all()
+    
+
 
     def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
@@ -145,13 +154,15 @@ class CreateStudent(graphene.Mutation):
         student_fingerprint_id = graphene.String()
         student_degree_program = graphene.String()
         student_gender = graphene.String()
+        student_phone_number = graphene.String()
+        student_associated_group_name =  graphene.String()
 
 
     student = graphene.Field(student_type)
 
     def mutate(self, info, student_reg_number, student_fingerprint_id,
                student_first_name , student_middle_name, student_surname,
-               student_degree_program,student_gender):
+               student_degree_program,student_gender, student_phone_number,student_associated_group_name=None):
 
         createdStudent = student.objects.create(
         student_reg_number = student_reg_number,
@@ -160,7 +171,9 @@ class CreateStudent(graphene.Mutation):
         student_surname =student_surname,
         student_fingerprint_id = student_fingerprint_id,
         student_degree_program = student_degree_program,
-        student_gender=student_gender)
+        student_gender=student_gender,
+        student_associated_group_name = student_associated_group_name,
+        student_phone_number= student_phone_number)
 
         return CreateStudent( student = createdStudent)
 
@@ -174,10 +187,11 @@ class UpdateStudent(graphene.Mutation):
         student_surname = graphene.String()
         student_degree_program = graphene.String()
         student_gender = graphene.String()
+        student_phone_number= graphene.String()
 
     student = graphene.Field(student_type)
 
-    def mutate(self, info, student_reg_number, student_first_name =None, student_middle_name=None, student_surname =None, student_degree_program =None, student_gender =None):
+    def mutate(self, info, student_reg_number, student_phone_number = None, student_first_name =None, student_middle_name=None, student_surname =None, student_degree_program =None, student_gender =None):
 
         updatedStudent = student.objects.get(pk=student_reg_number)
 
@@ -186,7 +200,8 @@ class UpdateStudent(graphene.Mutation):
         updatedStudent.student_surname =student_surname if student_surname is not None else updatedStudent.student_surname
         updatedStudent.student_degree_program = student_degree_program if student_degree_program is not None else updatedStudent.student_degree_program
         updatedStudent.student_gender=student_gender if student_gender is not None else updatedStudent.student_gender
-        UpdateStudent.save()
+        updatedStudent.student_phone_number=student_phone_number if student_phone_number is not None else updatedStudent.student_phone_number
+        updatedStudent.save()
         return UpdateStudent( student = updatedStudent)
 
 
@@ -219,11 +234,12 @@ class CreateStaff(graphene.Mutation):
         staff_office= graphene.String()
         staff_role = graphene.String()
         staff_gender = graphene.String()
+        staff_phone_number= graphene.String()
 
 
     staff = graphene.Field(staff_type)
 
-    def mutate(self, info, staff_id, staff_first_name, staff_role, staff_middle_name,staff_surname,staff_office,staff_gender):
+    def mutate(self, info, staff_id,staff_phone_number, staff_first_name, staff_role, staff_middle_name,staff_surname,staff_office,staff_gender):
 
         createdStaff = staff.objects.create (
             staff_id = staff_id,
@@ -232,7 +248,8 @@ class CreateStaff(graphene.Mutation):
             staff_surname = staff_surname,
             staff_office = staff_office,
             staff_role = staff_role,
-            staff_gender = staff_gender)
+            staff_gender = staff_gender,
+            staff_phone_number= staff_phone_number)
 
 
         return CreateStaff( staff = createdStaff)
@@ -248,10 +265,11 @@ class UpdateStaff(graphene.Mutation):
         staff_office= graphene.String()
         staff_role= graphene.String()
         staff_gender = graphene.String()
+        staff_phone_number = graphene.String()
 
     staff = graphene.Field(staff_type)
 
-    def mutate(self, info, staff_id, staff_first_name = None,staff_middle_name= None, staff_surname= None,staff_office = None,staff_role = None,staff_gender = None):
+    def mutate(self, info, staff_id, staff_phone_number = None, staff_first_name = None,staff_middle_name= None, staff_surname= None,staff_office = None,staff_role = None,staff_gender = None):
 
         updatedStaff = staff.objects.get(pk=staff_id)
 
@@ -261,7 +279,8 @@ class UpdateStaff(graphene.Mutation):
         updatedStaff.staff_office = staff_office if staff_office is not None else updatedStaff.staff_office
         updatedStaff.staff_role = staff_role if staff_role is not None else updatedStaff.staff_role
         updatedStaff.staff_gender = staff_gender if staff_gender is not None else updatedStaff.staff_gender
-        UpdateStaff.save()
+        updatedStaff.staff_phone_number = staff_phone_number if staff_phone_number is not None else updatedStaff.staff_phone_number
+        updatedStaff.save()
         return UpdateStaff( staff = updatedStaff)
 
 
@@ -294,37 +313,35 @@ class CreateAppointment(graphene.Mutation):
         appointment_description= graphene.String()
         appointment_type=graphene.String()
         appointment_category= graphene.String()
-        staff_phone_number= graphene.Int()
         appointment_time = graphene.String()
         appointment_date = graphene.String()
-        student_phone_number= graphene.Int()
         student_reg_number= graphene.String()
-        appointment_status=graphene.String()
         staff_id=graphene.String()
 
     appointment = graphene.Field(appointment_type)
 
     def mutate(self, info, appointment_time, appointment_date, student_reg_number,
                      appointment_type, appointment_category,
-                    staff_phone_number,staff_id, appointment_status,
-                    appointment_description, student_phone_number):
+                    staff_id,appointment_description):
         
         studentobj = student.objects.get(pk=student_reg_number)
         staffobj = staff.objects.get(pk=staff_id)
 
         createdAppointment = appointment.objects.create (
         appointment_time = appointment_time,
-        appointment_status = appointment_status,
         appointment_description = appointment_description,
         appointment_type = appointment_type,
         staff_id= staffobj,
+        staff_phone_number = staffobj.staff_phone_number ,
+        student_phone_number=studentobj.student_phone_number ,
         appointment_date = appointment_date,
         student_reg_number=studentobj,
         appointment_category = appointment_category,
-        staff_phone_number = staff_phone_number,
-        student_phone_number = student_phone_number
+        student_surname = studentobj.student_surname ,
+        student_first_name = studentobj.student_first_name,
+        staff_first_name = staffobj.staff_first_name,
+        staff_surname = staffobj.staff_surname 
         )
-
 
         return CreateAppointment( appointment = createdAppointment)
 
@@ -334,31 +351,86 @@ class UpdateAppointment(graphene.Mutation):
     class  Arguments:
 
         appointment_id= graphene.ID()
+        appointment_date = graphene.String()
         appointment_time= graphene.String()
         appointment_status= graphene.String()
         appointment_description= graphene.String()
         appointment_type=graphene.String()
-        appointment_category= graphene.String()
-        staff_phone_number= graphene.Int()
-        student_phone_number= graphene.Int()
-        student_reg_number= graphene.String()
         staff_id=graphene.String()
+        student_reg_number=graphene.String()
+        
+        appointment_category= graphene.String()
 
     appointment = graphene.Field(appointment_type)
 
-    def mutate(self, info,appointment_id, appointment_time = None, appointment_status= None,appointment_description = None, appointment_type = None, appointment_category = None,               staff_phone_number = None, student_phone_number = None):
+    def mutate(self, info,appointment_id, staff_id , student_reg_number, appointment_time = None, appointment_date = None, appointment_status= None,appointment_description = None, appointment_type = None, appointment_category = None):
 
         updatedAppointment = appointment.objects.get(pk=appointment_id)
-
+        staffobj = staff.objects.get(pk=staff_id)
+        studentobj = student.objects.get(pk= student_reg_number)
+        
         updatedAppointment.appointment_time = appointment_time if appointment_time is not None else  updatedAppointment.appointment_time
         updatedAppointment.appointment_status = appointment_status if appointment_status is not None else updatedAppointment.appointment_status
         updatedAppointment.appointment_description = appointment_description if appointment_description is not None else updatedAppointment.appointment_description
         updatedAppointment.appointment_type = appointment_type if appointment_type is not None else updatedAppointment.appointment_type
         updatedAppointment.appointment_category = appointment_category if appointment_category is not None else updatedAppointment.appointment_category
-        updatedAppointment.staff_phone_number = staff_phone_number if staff_phone_number is not None else updatedAppointment.staff_phone_number
-        updatedAppointment.student_phone_number = student_phone_number if student_phone_number is not None else updatedAppointment.student_phone_number
+        updatedAppointment.staff_phone_number = staffobj.staff_phone_number 
+        updatedAppointment.student_phone_number = studentobj.student_phone_number 
+        updatedAppointment.staff_id = staffobj if staff_id is not None else updatedAppointment.staff_id
+        updatedAppointment.student_surname = studentobj.student_surname 
+        updatedAppointment.student_first_name = studentobj.student_first_name 
+        updatedAppointment.staff_first_name = staffobj.staff_first_name 
+        updatedAppointment.staff_surname = staffobj.staff_surname 
+        
+       
+        
+        if (appointment_date is not None):
+            if (date_time_object.date() <= (datetime.now().date() + timedelta(days = 14))):
+                date_time_object = datetime.strptime(appointment_date, "%Y-%m-%d")
+                updatedAppointment.date_time_object = appointment_date
+                updatedAppointment.appointment_reschedule_frequency+=1
+                
+                
+                account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
+                auth_token = "14a93eff44045bc413bec7112278bcd9"
+                client = Client(account_sid, auth_token)
+                
+                # message to student
+                msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(studentobj.student_first_name, studentobj.student_surname, staffobj.staff_first_name, staffobj.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+                client.api.account.messages.create(
+                    from_="+19704782047",
+                    to=updatedAppointment.student_phone_number,
+                    body=msg_to_student )
+            
+            # else:
+            #     msg = "Appointment reschedule can only be done at a maximum of 14 days."
+            #     return msg
+             
+            
+        if (appointment_status == "Approved"):
+            updatedAppointment.is_New = False
+            account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
+            auth_token = "14a93eff44045bc413bec7112278bcd9"
+            
+            client = Client(account_sid, auth_token)
+            
+            # message to staff
+            msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(staffobj.staff_first_name, staffobj.staff_surname, studentobj.student_first_name, studentobj.student_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            client.api.account.messages.create(
+                from_="+19704782047",
+                to=updatedAppointment.staff_phone_number, 
+                body=msg_to_staff)
+            
+            # message to student
+            msg_to_student = "Hello student {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(studentobj.student_first_name, studentobj.student_surname, staffobj.staff_first_name, staffobj.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            client.api.account.messages.create(
+                from_="+19704782047",
+                to=updatedAppointment.student_phone_number,
+                body=msg_to_student )
+        
+        
         updatedAppointment.save()
-        return UpdateAppointment( appointment = updatedAppointment )
+        return UpdateAppointment(appointment = updatedAppointment)
 
 
 class DeleteAppointment(graphene.Mutation):
@@ -394,12 +466,17 @@ class CreateComplain(graphene.Mutation):
         staff_obj= staff.objects.get(pk=complain_to_staff)
         appointment_obj= appointment.objects.get(pk=complain_from_appointment)
 
-        createdComplain= complain.objects.create (
+        if (appointment_obj.appointment_reschedule_frequency > 2 ):
+            createdComplain= complain.objects.create (
             complain_description = complain_description,
             complain_to_staff = staff_obj,
             complain_from_appointment = appointment_obj )
+        # else:
+        #     msg = "Unable to create complain, minimum number of reschedule times is not met."
+        #     return msg
 
-        return CreateComplain( complain = createdComplain)
+            return CreateComplain( complain = createdComplain)
+        pass
 
 
 class UpdateComplain(graphene.Mutation):
@@ -409,19 +486,24 @@ class UpdateComplain(graphene.Mutation):
         complain_description= graphene.String()
         complain_to_staff = graphene.String()
         complain_from_appointment = graphene.String()
+        complain_status = graphene.String()
         
     complain = graphene.Field(complain_type)
 
-    def mutate(self, info, complain_id, complain_description = None , complain_to_staff = None, complain_from_appointment= None):
+    def mutate(self, info, complain_id, complain_status,complain_description = None , complain_to_staff = None, complain_from_appointment= None):
 
         updatedComplain = complain.objects.get(pk=complain_id)
         appointment_obj = appointment.objects.get(pk=complain_from_appointment)
         staff_object = staff.objects.get(pk = complain_to_staff)
-
+        
         updatedComplain.complain_description = complain_description if complain_description is not None else  updatedComplain.complain_description
-        updatedComplain.staff_object = staff_object if staff_object is not None else updatedComplain.complain_to_staff
-        updatedComplain.staff_id = appointment_obj if appointment_obj is not None else updatedComplain.complain_from_appointment
-        UpdateComplain.save()
+        updatedComplain.complain_to_staff = staff_object.staff_id if complain_to_staff is not None else updatedComplain.complain_to_staff
+        updatedComplain.complain_from_appointment = appointment_obj.appointment_id if complain_from_appointment is not None else updatedComplain.complain_from_appointment
+        
+        if complain_status is not None:
+            updatedComplain.complain_is_new = False
+        
+        updatedComplain.save()
         return UpdateComplain( complain = updatedComplain)
 
 
