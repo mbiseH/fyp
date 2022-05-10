@@ -131,6 +131,8 @@ WSGI_APPLICATION = 'fyp.wsgi.application'
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
   'http://localhost:8080',
+    # "http://192.168.43.125:8080",
+
 )
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

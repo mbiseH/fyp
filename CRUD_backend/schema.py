@@ -1,4 +1,7 @@
 import os
+import sched
+import json
+import time
 import graphene
 from datetime import datetime, timedelta
 from twilio.rest import Client
@@ -80,6 +83,8 @@ class Query(graphene.ObjectType):
     all_appointments = graphene.List(appointment_type)
     student_appointment = graphene.List(appointment_type, student_reg_number=graphene.String())
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
+    staff_all_previous_appointments = graphene.List(appointment_type, staff_id=graphene.String())
+    student_all_previous_appointments = graphene.List(appointment_type, student_reg_number=graphene.String())
     count_new_appointments = graphene.Int()
     
 
@@ -101,6 +106,16 @@ class Query(graphene.ObjectType):
     
     def resolve_count_new_appointments(self, info):
         return appointment.objects.filter(is_New= True).count()
+    
+    def resolve_staff_all_previous_appointments(self, info, staff_id):
+        appointment_status="Expired"
+        return appointment.objects.filter(staff_id=staff_id).filter(appointment_status=appointment_status)
+    
+    def  resolve_student_all_previous_appointments(appointment_type, student_reg_number):
+        appointment_status="Expired"
+        return appointment.objects.filter(student_reg_number=student_reg_number).filter(appointment_status=appointment_status)
+        
+    
 
 
     all_tasks = graphene.List(task_type)
@@ -342,7 +357,7 @@ class CreateAppointment(graphene.Mutation):
         staff_first_name = staffobj.staff_first_name,
         staff_surname = staffobj.staff_surname 
         )
-
+        
         return CreateAppointment( appointment = createdAppointment)
 
 
@@ -363,40 +378,34 @@ class UpdateAppointment(graphene.Mutation):
 
     appointment = graphene.Field(appointment_type)
 
-    def mutate(self, info,appointment_id, staff_id , student_reg_number, appointment_time = None, appointment_date = None, appointment_status= None,appointment_description = None, appointment_type = None, appointment_category = None):
+    def mutate(self, info,appointment_id, appointment_time = None, appointment_date = None, appointment_status= None,appointment_description = None, appointment_type = None, appointment_category = None):
 
         updatedAppointment = appointment.objects.get(pk=appointment_id)
-        staffobj = staff.objects.get(pk=staff_id)
-        studentobj = student.objects.get(pk= student_reg_number)
         
+        
+        if appointment_time is not None:
+            appointment_time = datetime.strptime(appointment_time, '%H:%M').time()
         updatedAppointment.appointment_time = appointment_time if appointment_time is not None else  updatedAppointment.appointment_time
         updatedAppointment.appointment_status = appointment_status if appointment_status is not None else updatedAppointment.appointment_status
         updatedAppointment.appointment_description = appointment_description if appointment_description is not None else updatedAppointment.appointment_description
         updatedAppointment.appointment_type = appointment_type if appointment_type is not None else updatedAppointment.appointment_type
         updatedAppointment.appointment_category = appointment_category if appointment_category is not None else updatedAppointment.appointment_category
-        updatedAppointment.staff_phone_number = staffobj.staff_phone_number 
-        updatedAppointment.student_phone_number = studentobj.student_phone_number 
-        updatedAppointment.staff_id = staffobj if staff_id is not None else updatedAppointment.staff_id
-        updatedAppointment.student_surname = studentobj.student_surname 
-        updatedAppointment.student_first_name = studentobj.student_first_name 
-        updatedAppointment.staff_first_name = staffobj.staff_first_name 
-        updatedAppointment.staff_surname = staffobj.staff_surname 
         
-       
         
         if (appointment_date is not None):
-            if (date_time_object.date() <= (datetime.now().date() + timedelta(days = 14))):
-                date_time_object = datetime.strptime(appointment_date, "%Y-%m-%d")
-                updatedAppointment.date_time_object = appointment_date
+            date_object = datetime.strptime(appointment_date, "%Y-%m-%d").date()
+            
+            if (date_object <= (datetime.now().date() + timedelta(days = 14))):
+                updatedAppointment.appointment_date = date_object 
                 updatedAppointment.appointment_reschedule_frequency+=1
                 
                 
                 account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-                auth_token = "14a93eff44045bc413bec7112278bcd9"
+                auth_token = "ca9d7df7262e233050a5772847d949cd"
                 client = Client(account_sid, auth_token)
                 
                 # message to student
-                msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(studentobj.student_first_name, studentobj.student_surname, staffobj.staff_first_name, staffobj.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+                msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
                 client.api.account.messages.create(
                     from_="+19704782047",
                     to=updatedAppointment.student_phone_number,
@@ -410,25 +419,59 @@ class UpdateAppointment(graphene.Mutation):
         if (appointment_status == "Approved"):
             updatedAppointment.is_New = False
             account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-            auth_token = "14a93eff44045bc413bec7112278bcd9"
+            auth_token = "ca9d7df7262e233050a5772847d949cd"
             
             client = Client(account_sid, auth_token)
             
             # message to staff
-            msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(staffobj.staff_first_name, staffobj.staff_surname, studentobj.student_first_name, studentobj.student_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
             client.api.account.messages.create(
                 from_="+19704782047",
                 to=updatedAppointment.staff_phone_number, 
                 body=msg_to_staff)
             
             # message to student
-            msg_to_student = "Hello student {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(studentobj.student_first_name, studentobj.student_surname, staffobj.staff_first_name, staffobj.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            msg_to_student = "Hello student {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
             client.api.account.messages.create(
                 from_="+19704782047",
                 to=updatedAppointment.student_phone_number,
                 body=msg_to_student )
         
-        
+            
+            # scheduler_name = "scheduler_for_appointment_" + str(self.appointment_id)                        
+            # event_name = "event_for_appointment_" + str(self.appointment_id)
+            # date_string = time.strftime(updatedAppointment.appointment_date, "%Y-%m-%d").date
+            # time_string = time.strftime(updatedAppointment.appointment_time, "%H:%M:%S").time()
+            
+            # appointment_datetime_object = datetime.combine(updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            # reminder_alert_time = appointment_datetime_object - timedelta(minutes = 15)
+            # reminder_alert_time = time.mktime(reminder_alert_time.timetuple())
+            # scheduler_name = sched.scheduler()
+            
+            
+            # def reminder_method():                
+            #         account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
+            #         auth_token = "ca9d7df7262e233050a5772847d949cd"
+            #         client = Client(account_sid, auth_token)
+                    
+            #         # message to staff
+            #         msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, is due to begin in 15 minutes. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.appointment_date,updatedAppointment.appointment_time)
+            #         client.api.account.messages.create(
+            #             from_="+19704782047",
+            #             to=updatedAppointment.staff_phone_number, 
+            #             body=msg_to_staff)
+                    
+            #         # message to student
+            #         msg_to_student = "Hello student {} {}, an appointment with staff {} {} scheduled on {} at {},  is due to begin in 15 minutes. Kindly visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname,updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date,updatedAppointment.appointment_time)
+            #         client.api.account.messages.create(
+            #             from_="+19704782047",
+            #             to=updatedAppointment.student_phone_number,
+            #             body=msg_to_student )
+                   
+            # event1 = scheduler_name.enterabs(reminder_alert_time, 1, reminder_method(), kwargs = {})
+            
+            # scheduler_name.run()
+            
         updatedAppointment.save()
         return UpdateAppointment(appointment = updatedAppointment)
 
