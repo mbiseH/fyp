@@ -1,233 +1,496 @@
+mutation jf{
+  deleteAppointment(id:"2")
 
-DEPENDENCIES
-Download from https://www.graphviz.org/download/
-sudo apt install graphviz
-pip install django_extensions
+{
+  appointment
+  {
+    appointmentTime
+    appointmentDate
+    appointmentType
+    appointmentStatus
+    appointmentCategory
+    appointmentDescription
+    appointmentRescheduleFrequency
+  }
+}
+}
 
-pip3 install pydot
-
-python manage.py graph_models --pydot -a -g -o fypDBmodels.png
 
 
+query hjghgh{
+  staffAllPreviousAppointments(staffId:"1")
+  {
+    staffFirstName
+  }
+}
 
-# mutation{
-#   register(
-#     email:"gado98@gmail.com"
-#     password1:"malgado45"
-#     password2:"malgado45"
-#     username:"6"
-#   )
+query hkjkhk{
+  studentAllPreviousAppointments(studentRegNumber:"1")
+  {
+    staffId
+    {staffId}
+  }
+}
 
-# {success
-# errors
-# token
-# refreshToken
-# }
-# }
-# mutation{
-# 	createStudent(studentDegreeProgram:"TE"
-#   studentRegNumber:"6"
-#   studentGender:"F"
-#   studentFirstName:"Alisia"
-#   studentFingerprintId:"wiccllxxa888 stay here"
-#   studentSurname:"Saidi"
-#     studentMiddleName: "Kapenje"
-#   )
-#   {
-#     student{
-#       studentFirstName
-      
-#     }
-#   }
-# }
-# mutation{
-# createStaff(staffFirstName:"Geogina", 
-# 	staffRole:"Dean"
-#   staffGender:"F"
-#   staffId:"6"
-#   staffMiddleName:"TUMAINI"
-#   staffOffice:"H_AB 024"
-#   staffSurname:"MWAISA"
-  
-# )
-#   {
-#     staff{
-#       staffFirstName
-      
-#     }
-#   }
-#   # createStaff
-# }
 
-# {
-#   allStaffs
-#   {
-#    staffId
-#     staffOffice
-#     staffRole
+mutation uu{
+  updateStaff(staffId:"2", staffPhoneNumber : "+255692087745" )
+  {
+    staff
+    {
+      staffPhoneNumber
+    }
+  }
+}
+
+
+
+
+query hjhdd{
+  searchStudentsByGroup(studentAssociatedGroupName:"biometric")
+  {
+    studentFirstName
+    studentAssociatedGroupName
     
-#   }
-# }
+  }
+}
+
+mutation hkjkjh{
+	createStudent(
+  studentDegreeProgram:"SE"
+  studentRegNumber:"4"
+  studentGender:"M"
+  studentFirstName:"Isaac "
+  studentFingerprintId:"wiccllxxa888 stay here"
+  studentSurname:"Kamwelwe"
+    studentMiddleName: ""
+    studentPhoneNumber: "+255692087745"
+    studentAssociatedGroupName:"Artificial Intelligence"
+  )
+  {
+    student{
+      studentRegNumber
+      studentFirstName
+      studentSurname
+      studentAssociatedGroupName
+      
+    }
+  }
+}
+ 
+mutation CR{
+  createAppointment(
+  appointmentTime:"14:30"
+    appointmentType:"Indiv"
+    appointmentDescription:"blah blah blah "
+  appointmentDate:"2022-05-09"
+  appointmentCategory:"priv"
+    staffId:"1"
+    studentRegNumber: "1"
+  )
+  {
+    appointment
+    {
+      isNew
+    }
+  }
+}
 
 
-# 
-# mutation mbise
-# {
-#   createAppointment(
-    
-   
-#   appointmentTime:"14:00"
-#     appointmentType:"Indiv"
-#     appointmentDescription:"blah blah blah "
-#   appointmentDate:"2022-02-11"
-#   appointmentCategory:"priv"
-#     appointmentStatus:"pending"
-#     staffId:"1"
-#     studentRegNumber: "1"
-   
-#     staffPhoneNumber: 692067745
-# 		studentPhoneNumber: 746778585
-#   )
-#   {
-#     appointment
-#     {
-#       appointmentId
-#     }
-#   }
-# }
-
-# {
-#   allAppointments(staffId:"9")
-#   { 
-#   appointmentStatus
-#   }
-# }
-
-
-# {
-#   allTasks{
-#     taskId
-#     taskDescription
-#   }
-# }
-
-# mutation gadotz{
-#   createTask
-#   (
-#   appointmentId:"3"
-#     taskDescription:"Muzurure Tu mTakomaaaaa"
-#     taskFeedbackFile:"kazi.pdf"
-#     taskType:"coursewrok"
-#     staffId:"1"
-#     taskIssueDate:"16/10/2022"
-#   )
+query hjh{
+  allStaffs{
+    staffFirstName
+    staffSurname
+  }
   
-# {
-#   task{
-#   taskId  
-#   }
-# }
-# }
+}
+mutation jk{
+  updateAppointment(appointmentId:"16", appointmentStatus:"Pending")
+  {
+    appointment
+    {
+      appointmentStatus
+      appointmentTime
+    }
+  }
+  
+}
+  
+query jk{
+  allAppointments
+  { 
+  isNew
+  }
+}
 
-# mutation gadoboy
-# {
-# updateTask(appointmentId:"4"
-# taskId:8
-# taskDescription:"waosha karoti nyie kuweni wa poleeee") 
-#   {
-#     task{
-#       appointmentId{
-#         staffId{staffFirstName}
-#         studentRegNumber{studentFirstName}
-#       }
-#       taskId
-#     }
-#   }
-# }
 
-# {
-#     task(taskId:"2") {
-#     taskType
-#     taskDescription
-#     taskIssueDate
-#     taskFeedbackFile
-#       appointmentId{
-#         staffId{staffFirstName}
-#         studentRegNumber{studentFirstName}
-#       }
-#       taskId
-#     }
-#   }
+query hjjhjhj
+{
+  allAppointments
+  {
+   staffId
+    {
+      staffId
+    }appointmentStatus
+
+  }
+}
+
+
+query appointmentmoja{
+  appointment(appointmentId:"5")
+  {
+    appointmentId
+    appointmentTime
+    appointmentDate
+    appointmentType
+    appointmentStatus
+    appointmentCategory
+    appointmentDescription
+    appointmentRescheduleFrequency
+  }
+}
+
+mutation updateAppointment
+{
+  updateAppointment
+  (
+    appointmentId:"5",
+  appointmentTime:"10:20"
+  appointmentStatus:"Expired"
+  )
+  {
+    appointment
+    {
+      appointmentId
+      appointmentTime
+      appointmentDate
+      appointmentType
+      appointmentStatus
+      appointmentCategory
+      appointmentDescription
+      appointmentRescheduleFrequency
+    }
+  }
+}
+
+
+
+mutation registerUser{
+  register(
+    email:"gado98@gmail.com"
+    password1:"malgado45"
+    password2:"malgado45"
+    username:"6"
+  )
+{
+  success
+errors
+token
+refreshToken
+}
+}
+
+query jkljhkhk{
+  countNewAppointments
+}
+
+mutation createStudent{
+	createStudent(studentDegreeProgram:"TE"
+  studentRegNumber:""
+  studentGender:"F"
+  studentFirstName:"ALISIA"
+  studentFingerprintId:"wiccllxxa888 stay here"
+  studentSurname:"JUMA"
+    studentMiddleName: "JUMBE"
+  )
+  {
+    student{
+      studentFirstName
+      
+    }
+  }
+}
+mutation CreateStaff{
+createStaff(staffFirstName:"ISAAC", 
+	staffRole:"Instructor"
+  staffGender:"M"
+  staffId:"1"
+  staffMiddleName:"F"
+  staffOffice:"H_AB 024"
+  staffSurname:"MAHENGE"
+  staffPhoneNumber: "+255692087745"
+  
+)
+  {
+    staff{
+      staffFirstName
+      
+    }
+  }
+}
+
+query ViewAllStaff{
+  allStaffs
+  {
+   staffId
+    staffOffice
+    staffRole
+    staffPhoneNumber
+    
+  }
+}
+
+
+
+{
+  allStudents{
+    studentRegNumber
+    studentPhoneNumber
+  }
+}
+
+
+mutation createAppointment
+{
+  createAppointment(
+  	appointmentTime:"11:00"
+    appointmentDate:"2022-05-08"
+    appointmentType:"Indiv"
+    appointmentDescription:"Maadam , tunakuja kufanya clearance ofini, please"
+    appointmentCategory:"priv"
+    staffId:"1"
+    studentRegNumber: "1"
+    
+  )
+  {
+    appointment
+    {
+      appointmentId
+      staffId
+      {
+        staffId
+      }
+      studentRegNumber
+      {
+        studentRegNumber
+      }
+    }
+  }
+}
+
+
+query hjhk{
+  countNewAppointments
+}
+mutation UPdateAPPOINTMENT{
+  updateAppointment(appointmentId:"6",
+    studentRegNumber:"1",
+    staffId:"1" , 
+  appointmentDate : "2022-05-08"
+    appointmentTime:"12:30"
+  )
+  {
+    appointment
+    {
+      appointmentStatus
+      # appointmentRescheduleFrequency
+        appointmentDate
+      appointmentTime
+    }
+    
+  }
+  
+}
+mutation ghgh{
+  createComplain(complainDescription: "hjdfj", complainFromAppointment:"1",complainToStaff:"1")
+
+{
+  complain
+  {complainId
+  complainIsNew}
+}
+}
+
+
+query AllAPoint{
+  allAppointments
+  { 
+  # appointmentStatus
+    appointmentId
+    appointmentRescheduleFrequency
+  staffId {staffId
+  }
+    studentRegNumber {studentRegNumber}
+  }
+}
+
+
+
+
+
  # pull data from Various tables
-# {
-#   appointment(appointmentId:"10")
-# {
-#  appointmentDescription
-#   appointmentCategory
-#   appointmentTime
-#   staffPhoneNumber
-#   staffPhoneNumber
-#   studentRegNumber{
-#     studentRegNumber
-#     studentFirstName
-#     studentDegreeProgram
-#     studentFingerprintId
-#   }
-#   staffId{
-#     staffOffice
-#     staffGender
-#     staffFirstName
-#     staffMiddleName
-#     taskSet{
-#       taskType
-#       taskDescription
-#     }
-#   }
-# }
-# }
+query ViewAppointmentID{
+  appointment(appointmentId:"2")
+{
+ appointmentDescription
+  appointmentCategory
+  appointmentTime
+  staffPhoneNumber
+  staffPhoneNumber
+  studentRegNumber{
+    studentRegNumber
+    studentFirstName
+    studentDegreeProgram
+    studentFingerprintId
+  }
+  appointmentStatus
+  staffId{
+    staffOffice
+    staffGender
+    staffFirstName
+    staffMiddleName
+    taskSet{
+      taskType
+      taskDescription
+    }
+  }
+}
+}
+mutation del
+{
+  deleteAppointment(id:4)
+  {
+    appointment
+    {
+      appointmentId
+    }
+  }
+}
 
-#Student View His/her Apppointments
-# {
-#   studentAppointment(studentRegNumber:"5"){
-#     appointmentStatus
-#     appointmentTime
-#     appointmentDescription
+# #Student View His/her Apppointments
+query ViewStudentIDAppointment{
+  studentAppointment(studentRegNumber:"2"){
+    appointmentStatus
+    appointmentTime
+    appointmentDescription
     
-#     staffId{
-#       staffOffice
-#       staffFirstName
-#       staffSurname
-#     }
-#     studentRegNumber
-#     {
-#       studentFirstName
-#       studentRegNumber
-#       studentDegreeProgram
-#     }
-#   }
-# }
+    staffId{
+      staffOffice
+      staffFirstName
+      staffSurname
+    }
+    studentRegNumber
+    {
+      studentFirstName
+      studentRegNumber
+      studentDegreeProgram
+    }
+  }
+}
 
 
 # Staff View His/her Apppointments
-# {
-#   staffAppointment(staffId:"1"){
-#     appointmentStatus
-#     appointmentTime
-#     appointmentDescription
-#     # appointmentCategory
-#     staffId{
-#       staffOffice
-#       staffFirstName
-#       staffSurname
-#     }
-#     studentRegNumber
-#     {
-#       studentFirstName
-#       studentRegNumber
-#       studentDegreeProgram
-#     }
-#   }
-# }
+query ViewStaffIDAppointment{
+  staffAppointment(staffId:"1"){
+    appointmentStatus
+    appointmentTime
+    appointmentDescription
+    appointmentCategory
+    staffId{
+      staffOffice
+      staffFirstName
+      staffSurname
+    }
+    studentRegNumber
+    {
+      studentFirstName
+      studentRegNumber
+      studentDegreeProgram
+    }
+  }
+}
+
+mutation deleAPoint{
+  deleteAppointment(id:"3")
+  {
+    appointment{
+      appointmentDate
+    }
+  }
+}
+
+query allTasks{
+  allTasks{
+    taskId
+    taskDescription
+  }
+}
+
+mutation createTask{
+  createTask
+  (
+  appointmentId:"2"
+    taskDescription:"Muzurure Tu mTakomaaaaa"
+    taskFeedbackFile:"kazi.pdf"
+    taskType:"deployment"
+    taskDeadlineDate:"2022-02-22"
+    staffId:"2"
+    
+  )
+{
+  task{
+  taskId  
+  }
+}
+}
+
+mutation updateTask
+{
+updateTask(appointmentId:"2"
+taskId:1
+taskDescription:"waosha karoti nyie kuweni wa poleeee") 
+  {
+    task{
+      appointmentId{
+        staffId{staffFirstName}
+        studentRegNumber{studentFirstName}
+      }
+      taskId
+      taskDescription
+    }
+  }
+}
+
+query alll
+{
+  allAppointments
+  {
+    appointmentId
+  }
+}
+
+query ViewTaskD{
+    task(taskId:"2") {
+    taskType
+    taskDescription
+    taskIssueDate
+    taskFeedbackFile
+      appointmentId{
+        staffId{staffFirstName}
+        studentRegNumber{studentFirstName}
+      }
+      taskId
+    }
+  }
+
+query nbmn
+{
+  staffAppointment( 
+    staffId:"1"){
+   appointmentId
+  }
+}
 
 
 
