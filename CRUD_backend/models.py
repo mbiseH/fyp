@@ -1,7 +1,7 @@
 from django.db import models
 from datetime import datetime, timedelta
-from asyncio.windows_events import NULL
 from twilio.rest import Client
+from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class student(models.Model):
@@ -12,7 +12,7 @@ class student(models.Model):
     student_phone_number= models.CharField(max_length = 20 , null = False)
     student_degree_program = models.CharField(max_length=100)
     student_fingerprint_id = models.CharField(max_length=100)
-    student_associated_group_name = models.CharField(max_length=100, default=NULL)
+    student_associated_group_name = models.CharField(max_length=100,blank = True)
     student_gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default='F')
 
     def __str__(self):
