@@ -417,7 +417,6 @@ class UpdateAppointment(graphene.Mutation):
         updatedAppointment = appointment.objects.get(pk=appointment_id)
         
             
-        updatedAppointment.appointment_status = appointment_status if appointment_status is not None else updatedAppointment.appointment_status
         updatedAppointment.appointment_description = appointment_description if appointment_description is not None else updatedAppointment.appointment_description
         updatedAppointment.appointment_type = appointment_type if appointment_type is not None else updatedAppointment.appointment_type
         updatedAppointment.appointment_category = appointment_category if appointment_category is not None else updatedAppointment.appointment_category
@@ -436,6 +435,9 @@ class UpdateAppointment(graphene.Mutation):
             
         if appointment_time is not None or appointment_date is not None:
             updatedAppointment.appointment_reschedule_frequency+=1
+            appointment_status="Re-scheduled"
+            updatedAppointment.appointment_status = appointment_status 
+            
             account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
             auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
             client = Client(account_sid, auth_token)
