@@ -1,6 +1,6 @@
+from asyncio.windows_events import NULL
 from django.db import models
 from datetime import datetime, timedelta
-from asyncio.windows_events import NULL
 from twilio.rest import Client
 from django.contrib.auth.models import AbstractUser
 
@@ -12,7 +12,7 @@ class student(models.Model):
     student_phone_number= models.CharField(max_length = 20 , null = False)
     student_degree_program = models.CharField(max_length=100)
     student_fingerprint_id = models.CharField(max_length=100)
-    student_associated_group_name = models.CharField(max_length=100, default=NULL)
+    student_associated_group_name = models.CharField(max_length=100, null=True, default=None)
     student_gender = models.CharField(max_length=1, choices=(('M', 'Male'), ('F', 'Female')), default='F')
 
     def __str__(self):
@@ -99,10 +99,16 @@ class user(AbstractUser):
     def __str__(self):
         return self.username
     
-    # token ca9d7df7262e233050a5772847d949cd
-    # SID AC27ee4b69fc4c2f932ba1897d4dd3a184
-    # +19704782047
-    # phone number +255692087745
+
+    #phonenumbers Authorized for testing
+    
+    # +19704782047 serverPhone number
+    
+    # CLIENT PHONE NUMBERS
+    # phone number +255692087745 <mbise>
+    # phone number +255766577780 <eddie>
+    # phone number +255733466301 <peter>
+    
 
  
     

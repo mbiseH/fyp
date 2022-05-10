@@ -2,10 +2,10 @@ import os
 import sched
 import json
 import time
+from django.db.models import Sum
 import graphene
 from datetime import datetime, timedelta
 from twilio.rest import Client
-from asyncio.windows_events import NULL
 from graphene_django import DjangoObjectType
 from graphene_file_upload.scalars import Upload
 from django.core.files.storage import FileSystemStorage
@@ -86,6 +86,10 @@ class Query(graphene.ObjectType):
     staff_all_previous_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     student_all_previous_appointments = graphene.List(appointment_type, student_reg_number=graphene.String())
     count_new_appointments = graphene.Int()
+    count_completed_appointments = graphene.Int()
+    count_delayed_appointments= graphene.Int()
+    count_on_progress_appointments= graphene.Int()
+    count_pending_appointments = graphene.Int()
     
 
 
@@ -111,10 +115,26 @@ class Query(graphene.ObjectType):
         appointment_status="Expired"
         return appointment.objects.filter(staff_id=staff_id).filter(appointment_status=appointment_status)
     
-    def  resolve_student_all_previous_appointments(appointment_type, student_reg_number):
+    def  resolve_student_all_previous_appointments(self, info, student_reg_number):
         appointment_status="Expired"
         return appointment.objects.filter(student_reg_number=student_reg_number).filter(appointment_status=appointment_status)
-        
+    
+    def resolve_count_completed_appointments(self, info):
+        appointment_status="Expired"
+        return appointment.objects.filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_delayed_appointments(self, info):
+        return appointment.objects.all().aggregate(total = Sum("appointment_reschedule_frequency"))["total"]
+    
+    def resolve_count_on_progress_appointments(self, info):
+        appointment_status="On Progress"
+        return appointment.objects.filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_on_hold_appointments(self, info):
+        appointment_status="Pending"
+        return appointment.objects.filter(appointment_status= appointment_status).count()
+    
+     
     
 
 
@@ -383,43 +403,44 @@ class UpdateAppointment(graphene.Mutation):
         updatedAppointment = appointment.objects.get(pk=appointment_id)
         
         
-        if appointment_time is not None:
-            appointment_time = datetime.strptime(appointment_time, '%H:%M').time()
-        updatedAppointment.appointment_time = appointment_time if appointment_time is not None else  updatedAppointment.appointment_time
+        # if appointment_time is not None:
+            
         updatedAppointment.appointment_status = appointment_status if appointment_status is not None else updatedAppointment.appointment_status
         updatedAppointment.appointment_description = appointment_description if appointment_description is not None else updatedAppointment.appointment_description
         updatedAppointment.appointment_type = appointment_type if appointment_type is not None else updatedAppointment.appointment_type
         updatedAppointment.appointment_category = appointment_category if appointment_category is not None else updatedAppointment.appointment_category
         
+          
+        if appointment_time is not None:
+            appointment_time = datetime.strptime(appointment_time, '%H:%M').time()
+            updatedAppointment.appointment_time = appointment_time 
         
-        if (appointment_date is not None):
+        if appointment_date is not None:
             date_object = datetime.strptime(appointment_date, "%Y-%m-%d").date()
             
             if (date_object <= (datetime.now().date() + timedelta(days = 14))):
                 updatedAppointment.appointment_date = date_object 
-                updatedAppointment.appointment_reschedule_frequency+=1
-                
-                
-                account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-                auth_token = "ca9d7df7262e233050a5772847d949cd"
-                client = Client(account_sid, auth_token)
-                
-                # message to student
-                msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
-                client.api.account.messages.create(
-                    from_="+19704782047",
-                    to=updatedAppointment.student_phone_number,
-                    body=msg_to_student )
             
-            # else:
-            #     msg = "Appointment reschedule can only be done at a maximum of 14 days."
-            #     return msg
-             
+            
+        if appointment_time is not None or appointment_date is not None:
+            updatedAppointment.appointment_reschedule_frequency+=1
+            account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
+            auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
+            client = Client(account_sid, auth_token)
+            
+            # message to student
+            msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            client.api.account.messages.create(
+                from_="+19704782047",
+                to=updatedAppointment.student_phone_number,
+                body=msg_to_student ) 
+        
             
         if (appointment_status == "Approved"):
             updatedAppointment.is_New = False
             account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-            auth_token = "ca9d7df7262e233050a5772847d949cd"
+            auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
+            
             
             client = Client(account_sid, auth_token)
             
@@ -451,7 +472,7 @@ class UpdateAppointment(graphene.Mutation):
             
             # def reminder_method():                
             #         account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-            #         auth_token = "ca9d7df7262e233050a5772847d949cd"
+            #         auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
             #         client = Client(account_sid, auth_token)
                     
             #         # message to staff
