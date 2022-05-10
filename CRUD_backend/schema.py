@@ -85,12 +85,14 @@ class Query(graphene.ObjectType):
     staff_appointment = graphene.List(appointment_type, staff_id=graphene.String())
     staff_all_previous_appointments = graphene.List(appointment_type, staff_id=graphene.String())
     student_all_previous_appointments = graphene.List(appointment_type, student_reg_number=graphene.String())
-    count_new_appointments = graphene.Int()
-    count_completed_appointments = graphene.Int()
-    count_delayed_appointments= graphene.Int()
-    count_on_progress_appointments= graphene.Int()
-    count_pending_appointments = graphene.Int()
-    
+    count_new_staff_appointments = graphene.Int(staff_id=graphene.String())
+    count_new_student_appointments = graphene.Int(student_reg_number=graphene.String())
+    count_completed_student_appointments = graphene.Int(student_reg_number=graphene.String())
+    count_completed_staff_appointments = graphene.Int(staff_id=graphene.String())
+    count_delayed_staff_appointments =  graphene.Int(staff_id=graphene.String())
+    count_delayed_student_appointments = graphene.Int(student_reg_number=graphene.String())
+    count_on_hold_staff_appointments = graphene.Int(staff_id=graphene.String())
+    count_on_hold_student_appointments = graphene.Int(student_reg_number=graphene.String())
 
 
     def resolve_appointment(self, info, appointment_id):
@@ -108,9 +110,6 @@ class Query(graphene.ObjectType):
     def resolve_all_appointments (self, info):
         return appointment.objects.all()
     
-    def resolve_count_new_appointments(self, info):
-        return appointment.objects.filter(is_New= True).count()
-    
     def resolve_staff_all_previous_appointments(self, info, staff_id):
         appointment_status="Expired"
         return appointment.objects.filter(staff_id=staff_id).filter(appointment_status=appointment_status)
@@ -119,24 +118,39 @@ class Query(graphene.ObjectType):
         appointment_status="Expired"
         return appointment.objects.filter(student_reg_number=student_reg_number).filter(appointment_status=appointment_status)
     
-    def resolve_count_completed_appointments(self, info):
+    def resolve_count_completed_staff_appointments(self, info, staff_id):
         appointment_status="Expired"
-        return appointment.objects.filter(appointment_status= appointment_status).count()
+        return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status).count()
     
-    def resolve_count_delayed_appointments(self, info):
-        return appointment.objects.all().aggregate(total = Sum("appointment_reschedule_frequency"))["total"]
+    def resolve_count_completed_student_appointments(self, info, student_reg_number):
+        appointment_status="Expired"
+        return appointment.objects.filter(student_reg_number= student_reg_number).filter(appointment_status= appointment_status).count()
     
-    def resolve_count_on_progress_appointments(self, info):
-        appointment_status="On Progress"
-        return appointment.objects.filter(appointment_status= appointment_status).count()
-    
-    def resolve_count_on_hold_appointments(self, info):
+    def resolve_count_new_staff_appointments(self, info, staff_id):
         appointment_status="Pending"
-        return appointment.objects.filter(appointment_status= appointment_status).count()
+        return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status).count()
     
-     
+    def resolve_count_new_student_appointments(self, info, student_reg_number):
+        appointment_status="Pending"
+        return appointment.objects.filter(student_reg_number= student_reg_number).filter(appointment_status= appointment_status).count()
     
-
+    def resolve_count_delayed_staff_appointments(self, info, staff_id):
+        appointment_status="Re-scheduled"
+        return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_delayed_student_appointments(self, info, student_reg_number):
+        appointment_status="Re-scheduled"
+        return appointment.objects.filter(student_reg_number= student_reg_number).filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_on_hold_staff_appointments(self, info, staff_id):
+        appointment_status="Pending"
+        return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_on_hold_student_appointments(self, info, student_reg_number):
+        appointment_status="Pending"
+        return appointment.objects.filter(student_reg_number= student_reg_number).filter(appointment_status= appointment_status).count()
+    
+    
 
     all_tasks = graphene.List(task_type)
     task = graphene.Field(task_type, task_id=graphene.ID())
@@ -402,8 +416,6 @@ class UpdateAppointment(graphene.Mutation):
 
         updatedAppointment = appointment.objects.get(pk=appointment_id)
         
-        
-        # if appointment_time is not None:
             
         updatedAppointment.appointment_status = appointment_status if appointment_status is not None else updatedAppointment.appointment_status
         updatedAppointment.appointment_description = appointment_description if appointment_description is not None else updatedAppointment.appointment_description
@@ -437,7 +449,6 @@ class UpdateAppointment(graphene.Mutation):
         
             
         if (appointment_status == "Approved"):
-            updatedAppointment.is_New = False
             account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
             auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
             

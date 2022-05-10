@@ -2,6 +2,7 @@ from asyncio.windows_events import NULL
 from django.db import models
 from datetime import datetime, timedelta
 from twilio.rest import Client
+from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class student(models.Model):
@@ -39,17 +40,15 @@ class appointment(models.Model):
     appointment_id = models.BigAutoField(primary_key=True)
     appointment_time = models.TimeField()
     appointment_date = models.DateField()
-    is_New = models.BooleanField(default=True)
     appointment_type = models.CharField(max_length=20)
     appointment_category = models.CharField (max_length=10)
     appointment_description = models.CharField (max_length=200)
-    appointment_reschedule_frequency = models.IntegerField(default =0)
-    appointment_verification_status = models.BooleanField(default=False)
     student_phone_number = models.CharField (max_length=200)
     staff_phone_number = models.CharField (max_length=200)
     appointment_status = models.CharField(max_length=25, default="Pending")
     staff_first_name  = models.CharField (max_length=200)
     staff_surname = models.CharField (max_length=200)
+    appointment_reschedule_frequency = models.IntegerField (default=0)
     student_first_name = models.CharField (max_length=200)
     student_surname = models.CharField (max_length=200)
     appointment_creation_date = models.DateTimeField(auto_now_add=True)
@@ -99,7 +98,6 @@ class user(AbstractUser):
     def __str__(self):
         return self.username
     
-
     #phonenumbers Authorized for testing
     
     # +19704782047 serverPhone number
