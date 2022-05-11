@@ -407,7 +407,6 @@ class UpdateAppointment(graphene.Mutation):
         appointment_type=graphene.String()
         staff_id=graphene.String()
         student_reg_number=graphene.String()
-        
         appointment_category= graphene.String()
 
     appointment = graphene.Field(appointment_type)
@@ -416,10 +415,10 @@ class UpdateAppointment(graphene.Mutation):
 
         updatedAppointment = appointment.objects.get(pk=appointment_id)
         
-            
         updatedAppointment.appointment_description = appointment_description if appointment_description is not None else updatedAppointment.appointment_description
         updatedAppointment.appointment_type = appointment_type if appointment_type is not None else updatedAppointment.appointment_type
         updatedAppointment.appointment_category = appointment_category if appointment_category is not None else updatedAppointment.appointment_category
+        updatedAppointment.appointment_status = appointment_status if appointment_status is not None else updatedAppointment.appointment_status
         
           
         if appointment_time is not None:
