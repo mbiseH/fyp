@@ -93,7 +93,8 @@ class Query(graphene.ObjectType):
     count_delayed_student_appointments = graphene.Int(student_reg_number=graphene.String())
     count_on_hold_staff_appointments = graphene.Int(staff_id=graphene.String())
     count_on_hold_student_appointments = graphene.Int(student_reg_number=graphene.String())
-
+    count_on_progress_student_appointments = graphene.Int(student_reg_number=graphene.String())
+    count_on_progress_staff_appointments= graphene.Int(staff_id=graphene.String())
 
     def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
@@ -148,6 +149,14 @@ class Query(graphene.ObjectType):
     
     def resolve_count_on_hold_student_appointments(self, info, student_reg_number):
         appointment_status="Pending"
+        return appointment.objects.filter(student_reg_number= student_reg_number).filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_on_progress_staff_appointments(self, info, staff_id):
+        appointment_status="On Progress"
+        return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status).count()
+    
+    def resolve_count_on_progress_student_appointments(self, info, student_reg_number):
+        appointment_status="On Progress"
         return appointment.objects.filter(student_reg_number= student_reg_number).filter(appointment_status= appointment_status).count()
     
     
