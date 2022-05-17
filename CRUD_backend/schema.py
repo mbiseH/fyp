@@ -378,13 +378,14 @@ class CreateAppointment(graphene.Mutation):
 
     appointment = graphene.Field(appointment_type)
 
-    def mutate(self, info, appointment_time, appointment_date, student_reg_number,
+    def mutate(self, info,student_reg_number,
                      appointment_type, appointment_category,
-                    staff_id,appointment_description):
+                    staff_id,appointment_description,appointment_time=None, appointment_date=None):
         
         studentobj = student.objects.get(pk=student_reg_number)
         staffobj = staff.objects.get(pk=staff_id)
-
+        # appointment_time = datetime.strptime(appointment_time, '%H:%M').time()
+        # appointment_date = datetime.strptime(appointment_date, "%Y-%m-%d").date()
         createdAppointment = appointment.objects.create (
         appointment_time = appointment_time,
         appointment_description = appointment_description,
@@ -400,6 +401,17 @@ class CreateAppointment(graphene.Mutation):
         staff_first_name = staffobj.staff_first_name,
         staff_surname = staffobj.staff_surname 
         )
+        account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
+        auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
+        client = Client(account_sid, auth_token)
+            
+        # message to staff
+        msg_to_staff = "Hello staff {} {}, a new appointment request from student {} {}, needs your approval. Please visit the appointment system for more details. Thank you!".format(createdAppointment.staff_first_name, createdAppointment.staff_surname, createdAppointment.student_first_name, createdAppointment.student_surname)
+        client.api.account.messages.create(
+            from_="+19046927164",
+            to=createdAppointment.staff_phone_number, 
+            body=msg_to_staff)
+        
         
         return CreateAppointment( appointment = createdAppointment)
 
@@ -446,36 +458,36 @@ class UpdateAppointment(graphene.Mutation):
             appointment_status="Re-scheduled"
             updatedAppointment.appointment_status = appointment_status 
             
-            account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-            auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
+            account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
+            auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
             client = Client(account_sid, auth_token)
             
             # message to student
             msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
             client.api.account.messages.create(
-                from_="+19704782047",
+                from_="+19046927164",
                 to=updatedAppointment.student_phone_number,
                 body=msg_to_student ) 
         
             
         if (appointment_status == "Approved"):
-            account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-            auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
+            account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
+            auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
             
             
             client = Client(account_sid, auth_token)
             
             # message to staff
-            msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
-            client.api.account.messages.create(
-                from_="+19704782047",
-                to=updatedAppointment.staff_phone_number, 
-                body=msg_to_staff)
+            # msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            # client.api.account.messages.create(
+            #     from_="+19046927164",
+            #     to=updatedAppointment.staff_phone_number, 
+            #     body=msg_to_staff)
             
             # message to student
             msg_to_student = "Hello student {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
             client.api.account.messages.create(
-                from_="+19704782047",
+                from_="+19046927164",
                 to=updatedAppointment.student_phone_number,
                 body=msg_to_student )
         
@@ -492,21 +504,21 @@ class UpdateAppointment(graphene.Mutation):
             
             
             # def reminder_method():                
-            #         account_sid = "AC27ee4b69fc4c2f932ba1897d4dd3a184"
-            #         auth_token = "3bed0c7c61edda8bae9efba9ae0b49fb"
+            #         account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
+            #         auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
             #         client = Client(account_sid, auth_token)
                     
             #         # message to staff
             #         msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, is due to begin in 15 minutes. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.appointment_date,updatedAppointment.appointment_time)
             #         client.api.account.messages.create(
-            #             from_="+19704782047",
+            #             from_="+19046927164",
             #             to=updatedAppointment.staff_phone_number, 
             #             body=msg_to_staff)
                     
             #         # message to student
             #         msg_to_student = "Hello student {} {}, an appointment with staff {} {} scheduled on {} at {},  is due to begin in 15 minutes. Kindly visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname,updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date,updatedAppointment.appointment_time)
             #         client.api.account.messages.create(
-            #             from_="+19704782047",
+            #             from_="+19046927164",
             #             to=updatedAppointment.student_phone_number,
             #             body=msg_to_student )
                    
