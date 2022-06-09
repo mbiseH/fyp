@@ -2,6 +2,7 @@ import os
 import sched
 import json
 import time
+from typing_extensions import Required
 from django.db.models import Sum
 import graphene
 from datetime import datetime, timedelta
@@ -359,6 +360,7 @@ class DeleteStaff(graphene.Mutation):
 
 
 
+  # -----------> APPOINTMENT-TABLE-MUTATIONS----------
 
 # -----------> APPOINTMENT-TABLE-MUTATIONS----------
 # By mutations it means ni kuUpdate, kuCreate na kuDelete row kwenye
@@ -368,24 +370,24 @@ class CreateAppointment(graphene.Mutation):
 
     class  Arguments:
 
-        appointment_description= graphene.String()
-        appointment_type=graphene.String()
-        appointment_category= graphene.String()
-        appointment_time = graphene.String()
-        appointment_date = graphene.String()
-        student_reg_number= graphene.String()
-        staff_id=graphene.String()
+        appointment_description= graphene.String(required=True)
+        appointment_type=graphene.String(required=True)
+        appointment_category= graphene.String(required=True)
+        appointment_time = graphene.String(required=True)
+        appointment_date = graphene.String(required=True)
+        student_reg_number= graphene.String(required=True)
+        staff_id=graphene.String(required=True)
 
     appointment = graphene.Field(appointment_type)
 
     def mutate(self, info,student_reg_number,
                      appointment_type, appointment_category,
-                    staff_id,appointment_description,appointment_time=None, appointment_date=None):
+                    staff_id,appointment_description,appointment_time, appointment_date):
         
         studentobj = student.objects.get(pk=student_reg_number)
         staffobj = staff.objects.get(pk=staff_id)
-        # appointment_time = datetime.strptime(appointment_time, '%H:%M').time()
-        # appointment_date = datetime.strptime(appointment_date, "%Y-%m-%d").date()
+        appointment_time = datetime.strptime(appointment_time, '%H:%M').time()
+        appointment_date = datetime.strptime(appointment_date, "%Y-%m-%d").date()
         createdAppointment = appointment.objects.create (
         appointment_time = appointment_time,
         appointment_description = appointment_description,
@@ -401,16 +403,16 @@ class CreateAppointment(graphene.Mutation):
         staff_first_name = staffobj.staff_first_name,
         staff_surname = staffobj.staff_surname 
         )
-        account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
-        auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
-        client = Client(account_sid, auth_token)
+        # account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
+        # auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
+        # client = Client(account_sid, auth_token)
             
-        # message to staff
-        msg_to_staff = "Hello staff {} {}, a new appointment request from student {} {}, needs your approval. Please visit the appointment system for more details. Thank you!".format(createdAppointment.staff_first_name, createdAppointment.staff_surname, createdAppointment.student_first_name, createdAppointment.student_surname)
-        client.api.account.messages.create(
-            from_="+19046927164",
-            to=createdAppointment.staff_phone_number, 
-            body=msg_to_staff)
+        # # message to staff
+        # msg_to_staff = "Hello staff {} {}, a new appointment request from student {} {}, needs your approval. Please visit the appointment system for more details. Thank you!".format(createdAppointment.staff_first_name, createdAppointment.staff_surname, createdAppointment.student_first_name, createdAppointment.student_surname)
+        # client.api.account.messages.create(
+        #     from_="+19046927164",
+        #     to=createdAppointment.staff_phone_number, 
+        #     body=msg_to_staff)
         
         
         return CreateAppointment( appointment = createdAppointment)
