@@ -1,10 +1,14 @@
 from django.apps import apps
 from django.contrib import admin
-from .models import user,appointment
+from .models import user,appointment, staff, student
 from django.apps import apps
 
 admin.site.register(user)
 admin.site.register(appointment)
+admin.site.register(staff)
+
+admin.site.register(student)
+
 
 
 

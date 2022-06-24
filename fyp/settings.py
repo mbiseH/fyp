@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-yu-t80@mxa!6%+x3(1l1pe+j%8ulw0hei_1mh94e5@(ds$eew4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 GRAPHENE = {
     'SCHEMA': 'CRUD_backend.schema.schema', 
@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "graphql_auth",
     "corsheaders",
+    'Biometric'
 ]
 
 

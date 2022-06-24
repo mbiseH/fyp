@@ -10,7 +10,8 @@ from twilio.rest import Client
 from graphene_django import DjangoObjectType
 from graphene_file_upload.scalars import Upload
 from django.core.files.storage import FileSystemStorage
-from CRUD_backend.models import student, appointment, task, staff, complain
+from graphql_relay import from_global_id
+from CRUD_backend.models import student, appointment, task, staff, complain,user
 
 
 
@@ -96,6 +97,9 @@ class Query(graphene.ObjectType):
     count_on_hold_student_appointments = graphene.Int(student_reg_number=graphene.String())
     count_on_progress_student_appointments = graphene.Int(student_reg_number=graphene.String())
     count_on_progress_staff_appointments= graphene.Int(staff_id=graphene.String())
+    staff_all_new_appointments=graphene.List(appointment_type,staff_id=graphene.String())
+    on_progress_staff_appointments= graphene.List(appointment_type, staff_id=graphene.String())
+
 
     def resolve_appointment(self, info, appointment_id):
         # Querying a single appointment
@@ -113,16 +117,25 @@ class Query(graphene.ObjectType):
         return appointment.objects.all()
     
     def resolve_staff_all_previous_appointments(self, info, staff_id):
-        appointment_status="Expired"
-        return appointment.objects.filter(staff_id=staff_id).filter(appointment_status=appointment_status)
+        # appointment_status="Expired"
+        return appointment.objects.filter(staff_id=staff_id)
     
     def  resolve_student_all_previous_appointments(self, info, student_reg_number):
         appointment_status="Expired"
         return appointment.objects.filter(student_reg_number=student_reg_number).filter(appointment_status=appointment_status)
+
+    def  resolve_staff_all_new_appointments(self, info, staff_id):
+        appointment_status="Pending"
+        return appointment.objects.filter(staff_id=staff_id).filter(appointment_status=appointment_status)     
     
     def resolve_count_completed_staff_appointments(self, info, staff_id):
         appointment_status="Expired"
         return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status).count()
+    
+    def resolve_on_progress_staff_appointments(self, info, staff_id):
+        # appointment_status1="Approved"
+        appointment_status = "On Progress"
+        return appointment.objects.filter(staff_id= staff_id).filter(appointment_status= appointment_status)
     
     def resolve_count_completed_student_appointments(self, info, student_reg_number):
         appointment_status="Expired"
@@ -206,6 +219,7 @@ class Query(graphene.ObjectType):
 class CreateStudent(graphene.Mutation):
 
     class  Arguments:
+        userId = graphene.ID()
         student_reg_number = graphene.ID()
         student_first_name = graphene.String()
         student_middle_name = graphene.String()
@@ -219,15 +233,21 @@ class CreateStudent(graphene.Mutation):
 
     student = graphene.Field(student_type)
 
-    def mutate(self, info, student_reg_number, student_fingerprint_id,
+    def mutate(self, info, userId, student_reg_number, student_fingerprint_id,
                student_first_name , student_middle_name, student_surname,
                student_degree_program,student_gender, student_phone_number,student_associated_group_name=None):
 
+        id = from_global_id(userId)[1]
+        print("Hello ID", id)
+        userInstance = user.objects.get(pk=id)
+        userInstance.first_name = student_first_name
+        userInstance.middle_name = student_middle_name
+        userInstance.last_name = student_surname
+        userInstance.save()
+
         createdStudent = student.objects.create(
         student_reg_number = student_reg_number,
-        student_first_name = student_first_name,
-        student_middle_name = student_middle_name,
-        student_surname =student_surname,
+        user_id = userInstance.id,
         student_fingerprint_id = student_fingerprint_id,
         student_degree_program = student_degree_program,
         student_gender=student_gender,
@@ -274,9 +294,10 @@ class DeleteStudent(graphene.Mutation):
 
     def mutate(self, info, id):
 
-        deletedStudent = student.objects.get(pk=id)
+        deletedStudent = user.objects.get(pk=id)
         if student is not None:
             deletedStudent.delete()
+        
         return DeleteStudent(student = deletedStudent)
 
 
@@ -286,7 +307,8 @@ class DeleteStudent(graphene.Mutation):
 class CreateStaff(graphene.Mutation):
 
     class  Arguments:
-        staff_id= graphene.ID(required = True)
+        # staff_id= graphene.ID(required = True)
+        userId = graphene.ID()
         staff_first_name= graphene.String()
         staff_middle_name= graphene.String()
         staff_surname= graphene.String()
@@ -297,14 +319,21 @@ class CreateStaff(graphene.Mutation):
 
 
     staff = graphene.Field(staff_type)
+    def mutate(self, info, userId,staff_phone_number, staff_first_name, staff_role, staff_middle_name,staff_surname,staff_office,staff_gender):
 
-    def mutate(self, info, staff_id,staff_phone_number, staff_first_name, staff_role, staff_middle_name,staff_surname,staff_office,staff_gender):
 
+        id = from_global_id(userId)[1]
+        print("Hello ID", id)
+        userInstance = user.objects.get(pk=id)
+        userInstance.first_name = staff_first_name
+        userInstance.middle_name = staff_middle_name
+        userInstance.last_name = staff_surname
+
+        userInstance.save()
         createdStaff = staff.objects.create (
-            staff_id = staff_id,
-            staff_first_name = staff_first_name,
-            staff_middle_name = staff_middle_name,
-            staff_surname = staff_surname,
+
+            # staff_id = staff_id,
+            user_id = userInstance.id,
             staff_office = staff_office,
             staff_role = staff_role,
             staff_gender = staff_gender,
@@ -398,10 +427,10 @@ class CreateAppointment(graphene.Mutation):
         appointment_date = appointment_date,
         student_reg_number=studentobj,
         appointment_category = appointment_category,
-        student_surname = studentobj.student_surname ,
-        student_first_name = studentobj.student_first_name,
-        staff_first_name = staffobj.staff_first_name,
-        staff_surname = staffobj.staff_surname 
+        # student_surname = user.lastName ,
+        # student_first_name = user.student_first_name,
+        # staff_first_name = staffobj.staff_first_name,
+        # staff_surname = staffobj.staff_surname 
         )
         # account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
         # auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
@@ -422,7 +451,7 @@ class UpdateAppointment(graphene.Mutation):
 
     class  Arguments:
 
-        appointment_id= graphene.ID()
+        appointment_id= graphene.ID(required=True)
         appointment_date = graphene.String()
         appointment_time= graphene.String()
         appointment_status= graphene.String()
@@ -465,19 +494,19 @@ class UpdateAppointment(graphene.Mutation):
             client = Client(account_sid, auth_token)
             
             # message to student
-            msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
-            client.api.account.messages.create(
-                from_="+19046927164",
-                to=updatedAppointment.student_phone_number,
-                body=msg_to_student ) 
+        #     msg_to_student = "Hello student {} {}, an appointment with {} {} has been re-scheduled to {} at {}. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+        #     client.api.account.messages.create(
+        #         from_="+19046927164",
+        #         to=updatedAppointment.student_phone_number,
+        #         body=msg_to_student ) 
         
             
-        if (appointment_status == "Approved"):
-            account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
-            auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
+        # if (appointment_status == "Approved"):
+        #     account_sid = "ACb74bc69114ca9ed248d45ab05f726bac"
+        #     auth_token = "b08d8c569f37651e3ac9e8e4438b4ea8"
             
             
-            client = Client(account_sid, auth_token)
+        #     client = Client(account_sid, auth_token)
             
             # message to staff
             # msg_to_staff = "Hello staff {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
@@ -487,11 +516,11 @@ class UpdateAppointment(graphene.Mutation):
             #     body=msg_to_staff)
             
             # message to student
-            msg_to_student = "Hello student {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
-            client.api.account.messages.create(
-                from_="+19046927164",
-                to=updatedAppointment.student_phone_number,
-                body=msg_to_student )
+            # msg_to_student = "Hello student {} {}, an appointment with {} {} scheduled on {} at {}, has been approved. Please visit the appointment system for more details. Thank you!".format(updatedAppointment.student_first_name, updatedAppointment.student_surname, updatedAppointment.staff_first_name, updatedAppointment.staff_surname, updatedAppointment.appointment_date, updatedAppointment.appointment_time)
+            # client.api.account.messages.create(
+            #     from_="+19046927164",
+            #     to=updatedAppointment.student_phone_number,
+            #     body=msg_to_student )
         
             
             # scheduler_name = "scheduler_for_appointment_" + str(self.appointment_id)                        
